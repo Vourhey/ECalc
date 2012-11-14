@@ -1,0 +1,108 @@
+#include <QtGui>
+#include "calculator.h"
+
+Calculator::Calculator(QWidget *parent) :
+    QWidget(parent)
+{
+    sumOfMemory = 0.0;
+    leftOperand = 0.0;
+
+    QGridLayout *gridLayout = new QGridLayout;
+
+    lineEdit = new QLineEdit;
+    lineEdit->setAlignment(Qt::AlignRight);
+    lineEdit->setMaxLength(15);
+    lineEdit->setReadOnly(true);
+
+    QFont f = lineEdit->font();
+    f.setPointSize(f.pointSize() + 8);
+    lineEdit->setFont(f);
+
+    gridLayout->addWidget(lineEdit, 0, 0, 1, 6);
+
+    Button *backspaceButton = new Button(tr("Backspace"));
+    Button *clearButton = new Button(tr("Clear"));
+    Button *clearAllButton = new Button(tr("Clear All"));
+
+    gridLayout->addWidget(backspaceButton, 1, 0, 1, 2);
+    gridLayout->addWidget(clearButton, 1, 2, 1, 2);
+    gridLayout->addWidget(clearAllButton, 1, 4, 1, 2);
+
+    Button *memoryClearButton = new Button(tr("MC"));
+    connect(memoryClearButton, SIGNAL(clicked()), SLOT(clearMemory()));
+
+    Button *memoryReadButton = new Button(tr("MR"));
+    connect(memoryReadButton, SIGNAL(clicked()), SLOT(readMemory()));
+
+    Button *memoryStoreButton = new Button(tr("MS"));
+    connect(memoryStoreButton, SIGNAL(clicked()), SLOT(storeInMemory()));
+
+    Button *memorySumButton = new Button(tr("M+"));
+    connect(memorySumButton, SIGNAL(clicked()), SLOT(sumMemory()));
+
+    gridLayout->addWidget(memoryClearButton, 2, 0);
+    gridLayout->addWidget(memoryReadButton, 3, 0);
+    gridLayout->addWidget(memoryStoreButton, 4, 0);
+    gridLayout->addWidget(memorySumButton, 5, 0);
+
+    // цифры
+    int number = 1;
+    for(int i = 4; i > 1; --i)
+        for(int j = 1; j < 4; ++j)
+        {
+            Button *btn = new Button(QString("%1").arg(number),
+                                     QKeySequence(QString("%1").arg(number)));
+            gridLayout->addWidget(btn, i, j);
+            ++number;
+            if(number == 10) break;
+        }
+
+    Button *zeroButton = new Button(tr("0"), QKeySequence(Qt::Key_0));
+    Button *pointButton = new Button(tr("."), QKeySequence(","));
+    Button *plusMinusButton = new Button(tr("\xB1"));
+
+    gridLayout->addWidget(zeroButton, 5, 1);
+    gridLayout->addWidget(pointButton, 5, 2);
+    gridLayout->addWidget(plusMinusButton, 5, 3);
+
+    Button *divideButton = new Button(tr("\xF7"), QKeySequence("/"));
+    Button *multiplicationButton = new Button(tr("x"), QKeySequence("*"));
+    Button *minusButton = new Button(tr("-"), QKeySequence(Qt::Key_Minus));
+    Button *plusButton = new Button(tr("+"), QKeySequence(Qt::Key_Plus));
+
+    Button *sqrtButton = new Button(tr("Sqrt"));
+    Button *powerButton = new Button(tr("x\xB2"));
+    Button *minusOneDegreeButton = new Button(tr("1/x"));
+    Button *resultButton = new Button(tr("="), QKeySequence(Qt::Key_Enter));
+
+    gridLayout->addWidget(divideButton, 2, 4);
+    gridLayout->addWidget(multiplicationButton, 3, 4);
+    gridLayout->addWidget(minusButton, 4, 4);
+    gridLayout->addWidget(plusButton, 5, 4);
+    gridLayout->addWidget(sqrtButton, 2, 5);
+    gridLayout->addWidget(powerButton, 3, 5);
+    gridLayout->addWidget(minusOneDegreeButton, 4, 5);
+    gridLayout->addWidget(resultButton, 5, 5);
+
+    setLayout(gridLayout);
+}
+
+void Calculator::clearMemory()
+{
+    sumOfMemory = 0.0;
+}
+
+void Calculator::readMemory()
+{
+    lineEdit->setText(QString("%1").arg(sumOfMemory));
+}
+
+void Calculator::storeInMemory()
+{
+    sumOfMemory = lineEdit->text().toDouble();
+}
+
+void Calculator::sumMemory()
+{
+    sumOfMemory += lineEdit->text().toDouble();
+}
