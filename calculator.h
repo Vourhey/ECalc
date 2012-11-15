@@ -35,7 +35,10 @@ private:
     QLineEdit * lineEdit;
 
     double sumOfMemory;
-    double leftOperand;
+    double sumSoFar;
+    double factorSoFar;
+    QString additiveStr;
+    QString multipliStr;
     bool waitOperand;
 };
 
