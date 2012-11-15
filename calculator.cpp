@@ -6,6 +6,7 @@ Calculator::Calculator(QWidget *parent) :
 {
     sumOfMemory = 0.0;
     leftOperand = 0.0;
+    waitOperand = true;
 
     QGridLayout *gridLayout = new QGridLayout;
 
@@ -20,25 +21,19 @@ Calculator::Calculator(QWidget *parent) :
 
     gridLayout->addWidget(lineEdit, 0, 0, 1, 6);
 
-    Button *backspaceButton = new Button(tr("Backspace"));
-    Button *clearButton = new Button(tr("Clear"));
-    Button *clearAllButton = new Button(tr("Clear All"));
+    Button *backspaceButton = createButton(tr("Backspace"), SLOT(backspaceSlot()),
+                                           QKeySequence(Qt::Key_Backspace));
+    Button *clearButton = createButton(tr("Clear"), SLOT(clearSlot()));
+    Button *clearAllButton = createButton(tr("Clear All"), SLOT(clearAllSlot()));
 
     gridLayout->addWidget(backspaceButton, 1, 0, 1, 2);
     gridLayout->addWidget(clearButton, 1, 2, 1, 2);
     gridLayout->addWidget(clearAllButton, 1, 4, 1, 2);
 
-    Button *memoryClearButton = new Button(tr("MC"));
-    connect(memoryClearButton, SIGNAL(clicked()), SLOT(clearMemory()));
-
-    Button *memoryReadButton = new Button(tr("MR"));
-    connect(memoryReadButton, SIGNAL(clicked()), SLOT(readMemory()));
-
-    Button *memoryStoreButton = new Button(tr("MS"));
-    connect(memoryStoreButton, SIGNAL(clicked()), SLOT(storeInMemory()));
-
-    Button *memorySumButton = new Button(tr("M+"));
-    connect(memorySumButton, SIGNAL(clicked()), SLOT(sumMemory()));
+    Button *memoryClearButton = createButton(tr("MC"), SLOT(clearMemory()));
+    Button *memoryReadButton = createButton(tr("MR"), SLOT(readMemory()));
+    Button *memoryStoreButton = createButton(tr("MS"), SLOT(storeInMemory()));
+    Button *memorySumButton = createButton(tr("M+"), SLOT(sumMemory()));
 
     gridLayout->addWidget(memoryClearButton, 2, 0);
     gridLayout->addWidget(memoryReadButton, 3, 0);
@@ -50,30 +45,30 @@ Calculator::Calculator(QWidget *parent) :
     for(int i = 4; i > 1; --i)
         for(int j = 1; j < 4; ++j)
         {
-            Button *btn = new Button(QString("%1").arg(number),
+            Button *btn = createButton(QString("%1").arg(number), SLOT(digitButtonSlot()),
                                      QKeySequence(QString("%1").arg(number)));
             gridLayout->addWidget(btn, i, j);
             ++number;
             if(number == 10) break;
         }
 
-    Button *zeroButton = new Button(tr("0"), QKeySequence(Qt::Key_0));
-    Button *pointButton = new Button(tr("."), QKeySequence(","));
-    Button *plusMinusButton = new Button(tr("\xB1"));
+    Button *zeroButton = createButton(tr("0"), SLOT(digitButtonSlot()), QKeySequence(Qt::Key_0));
+    Button *pointButton = createButton(tr("."), SLOT(pointButtonSlot()), QKeySequence(","));
+    Button *plusMinusButton = createButton(tr("\xB1"), SLOT(unaryOperationSlot()));
 
     gridLayout->addWidget(zeroButton, 5, 1);
     gridLayout->addWidget(pointButton, 5, 2);
     gridLayout->addWidget(plusMinusButton, 5, 3);
 
-    Button *divideButton = new Button(tr("\xF7"), QKeySequence("/"));
-    Button *multiplicationButton = new Button(tr("x"), QKeySequence("*"));
-    Button *minusButton = new Button(tr("-"), QKeySequence(Qt::Key_Minus));
-    Button *plusButton = new Button(tr("+"), QKeySequence(Qt::Key_Plus));
+    Button *divideButton = createButton(tr("\xF7"), SLOT(twoOperandSlot()), QKeySequence("/"));
+    Button *multiplicationButton = createButton(tr("x"), SLOT(twoOperandSlot()), QKeySequence("*"));
+    Button *minusButton = createButton(tr("-"), SLOT(twoOperandSlot()), QKeySequence(Qt::Key_Minus));
+    Button *plusButton = createButton(tr("+"), SLOT(twoOperandSlot()), QKeySequence(Qt::Key_Plus));
 
-    Button *sqrtButton = new Button(tr("Sqrt"));
-    Button *powerButton = new Button(tr("x\xB2"));
-    Button *minusOneDegreeButton = new Button(tr("1/x"));
-    Button *resultButton = new Button(tr("="), QKeySequence(Qt::Key_Enter));
+    Button *sqrtButton = createButton(tr("Sqrt"), SLOT(unaryOperationSlot()));
+    Button *powerButton = createButton(tr("x\xB2"), SLOT(unaryOperationSlot()));
+    Button *minusOneDegreeButton = createButton(tr("1/x"), SLOT(unaryOperationSlot()));
+    Button *resultButton = createButton(tr("="), SLOT(unaryOperationSlot()), QKeySequence(Qt::Key_Enter));
 
     gridLayout->addWidget(divideButton, 2, 4);
     gridLayout->addWidget(multiplicationButton, 3, 4);
@@ -85,6 +80,67 @@ Calculator::Calculator(QWidget *parent) :
     gridLayout->addWidget(resultButton, 5, 5);
 
     setLayout(gridLayout);
+}
+
+Button *Calculator::createButton(const QString &text, const char *member, const QKeySequence &key)
+{
+    Button *btn = new Button(text);
+    connect(btn, SIGNAL(clicked()), member);
+
+    if(!key.isEmpty()) btn->setShortcut(key);
+    return btn;
+}
+
+void Calculator::backspaceSlot()
+{
+    QString t = lineEdit->text();
+    t.chop(1);
+    lineEdit->setText(t);
+}
+
+void Calculator::clearSlot()
+{
+
+}
+
+void Calculator::clearAllSlot()
+{
+
+}
+
+void Calculator::digitButtonSlot()
+{
+    if(waitOperand)
+    {
+        lineEdit->clear();
+        waitOperand = false;
+    }
+
+    Button *btn = qobject_cast<Button*>(sender());
+
+    QString text = lineEdit->text();
+    text.append(btn->text());
+    lineEdit->setText(text);
+}
+
+void Calculator::pointButtonSlot()
+{
+
+}
+
+void Calculator::twoOperandSlot()
+{
+
+}
+
+void Calculator::unaryOperationSlot()
+{
+
+}
+
+void Calculator::resultSlot()
+{
+
 }
 
 void Calculator::clearMemory()

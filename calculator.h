@@ -15,17 +15,28 @@ public:
 signals:
     
 private slots:
+    void backspaceSlot();
+    void clearSlot();
+    void clearAllSlot();
+    void digitButtonSlot();
+    void pointButtonSlot();
+    void twoOperandSlot(); // для + - * /
+    void unaryOperationSlot(); // для унарных операций
+    void resultSlot();
     void clearMemory();
     void readMemory();
     void storeInMemory();
     void sumMemory();
 
 private:
+    Button *createButton(const QString &text, const char *member,
+                         const QKeySequence &key = QKeySequence());
+
     QLineEdit * lineEdit;
 
     double sumOfMemory;
     double leftOperand;
-    
+    bool waitOperand;
 };
 
 #endif // CALCULATOR_H
