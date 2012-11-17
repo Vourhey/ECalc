@@ -1,25 +1,20 @@
 #include <QtGui>
 #include "calculator.h"
+#include "lineedit.h"
 
 Calculator::Calculator(QWidget *parent) :
     QWidget(parent)
 {
-    sumOfMemory = 0.0;
     sumSoFar    = 0.0;
     factorSoFar = 0.0;
     waitOperand = false;
 
+    for(int i = 0; i < 10; ++i)
+        sumOfMemory[i] = 0.0;
+
     QGridLayout *gridLayout = new QGridLayout;
 
-    lineEdit = new QLineEdit(tr("0"));
-    lineEdit->setAlignment(Qt::AlignRight);
-    lineEdit->setMaxLength(15);
-    lineEdit->setReadOnly(true);
-
-    QFont f = lineEdit->font();
-    f.setPointSize(f.pointSize() + 8);
-    lineEdit->setFont(f);
-
+    lineEdit = new LineEdit;
     gridLayout->addWidget(lineEdit, 0, 0, 1, 6);
 
     Button *backspaceButton = createButton(tr("Backspace"), SLOT(backspaceSlot()),
@@ -31,15 +26,31 @@ Calculator::Calculator(QWidget *parent) :
     gridLayout->addWidget(clearButton, 1, 2, 1, 2);
     gridLayout->addWidget(clearAllButton, 1, 4, 1, 2);
 
-    Button *memoryClearButton = createButton(tr("MC"), SLOT(clearMemory()));
+    // следующие три кнопочки имееют дополнительное мени (popup)
     Button *memoryReadButton = createButton(tr("MR"), SLOT(readMemory()));
-    Button *memoryStoreButton = createButton(tr("MS"), SLOT(storeInMemory()));
-    Button *memorySumButton = createButton(tr("M+"), SLOT(sumMemory()));
+    memoryReadButton->setPopupMode(QToolButton::MenuButtonPopup);
+    QMenu *mr = new QMenu(tr("MR"));
+    connect(mr, SIGNAL(aboutToShow()), SLOT(memoryMenuShow())); // элементы выстраиваются согласно памяти
+    memoryReadButton->setMenu(mr);
 
-    gridLayout->addWidget(memoryClearButton, 2, 0);
-    gridLayout->addWidget(memoryReadButton, 3, 0);
-    gridLayout->addWidget(memoryStoreButton, 4, 0);
-    gridLayout->addWidget(memorySumButton, 5, 0);
+    Button *memoryStoreButton = createButton(tr("MS"), SLOT(storeInMemory()));
+    memoryStoreButton->setPopupMode(QToolButton::MenuButtonPopup);
+    QMenu *ms = new QMenu(tr("MS"));
+    connect(ms, SIGNAL(aboutToShow()), SLOT(memoryMenuShow()));
+    memoryStoreButton->setMenu(ms);
+
+    Button *memorySumButton = createButton(tr("M+"), SLOT(sumMemory()));
+    memorySumButton->setPopupMode(QToolButton::MenuButtonPopup);
+    QMenu *m = new QMenu(tr("M-"));
+    m->addAction(tr("M-"), this, SLOT(minusMemory()));
+    memorySumButton->setMenu(m);
+
+    Button *percentButton = createButton(tr("%"), SLOT(unaryOperationSlot()));
+
+    gridLayout->addWidget(memoryReadButton, 2, 0);
+    gridLayout->addWidget(memoryStoreButton, 3, 0);
+    gridLayout->addWidget(memorySumButton, 4, 0);
+    gridLayout->addWidget(percentButton, 5, 0);
 
     // цифры
     int number = 1;
@@ -109,7 +120,6 @@ void Calculator::clearSlot()
 void Calculator::clearAllSlot()
 {
     lineEdit->setText(tr("0"));
-    sumOfMemory = 0.0;
     sumSoFar = 0.0;
     waitOperand = false;
     additiveStr = "";
@@ -141,7 +151,7 @@ void Calculator::pointButtonSlot()
 }
 
 // вспомогательная функция для подсчета
-static double calculate(double op1, double op2, const QString &d)
+static qreal calculate(qreal op1, qreal op2, const QString &d)
 {
     if(d == QObject::tr("+"))
         return op1 + op2;
@@ -156,7 +166,7 @@ static double calculate(double op1, double op2, const QString &d)
 
 void Calculator::twoOperandSlot()
 {
-    double number = lineEdit->text().toDouble();
+    qreal number = lineEdit->text().toDouble();
 
     Button *btn = qobject_cast<Button*>(sender());
     QString operation = btn->text();
@@ -183,17 +193,20 @@ void Calculator::twoOperandSlot()
     }
     else // divide or multipli
     {
+        if(waitOperand) // ещё один костыль
+            additiveStr = "";
         multipliStr = operation;
         factorSoFar = number;
     }
 
+    lineEdit->setOperator(operation);
     waitOperand = true;
 }
 
 void Calculator::unaryOperationSlot()
 {
     Button *btn = qobject_cast<Button*>(sender());
-    double number = lineEdit->text().toDouble();
+    qreal number = lineEdit->text().toDouble();
 
     QString operation = btn->text();
 
@@ -211,13 +224,18 @@ void Calculator::unaryOperationSlot()
     }
     else if(operation == tr("\xB1"))
         number = -number;
+    else if(operation == tr("%"))
+    {
+        if(sumSoFar) number = sumSoFar * number / 100;
+        else number /= 100;
+    }
 
     lineEdit->setText(QString::number(number));
 }
 
 void Calculator::resultSlot()
 {
-    double number = lineEdit->text().toDouble();
+    qreal number = lineEdit->text().toDouble();
 
     if(!multipliStr.isEmpty())
     {
@@ -235,25 +253,74 @@ void Calculator::resultSlot()
         sumSoFar = 0.0;
     }
 
+    lineEdit->resetOperator();
     waitOperand = true;
 }
 
-void Calculator::clearMemory()
+void Calculator::memoryMenuShow()
 {
-    sumOfMemory = 0.0;
+    QMenu *m = qobject_cast<QMenu*>(sender());
+    QString t = m->title();
+
+    QList<QAction*> actList;
+
+    if(t == tr("MR"))
+        for(int i=0; i<10; i++)
+        {
+            QAction *act = new QAction(QString::number(sumOfMemory[i]), this);
+            act->setData(QVariant(i));  // номер ячейки
+            connect(act, SIGNAL(triggered()), this, SLOT(readMemory()));
+            actList.append(act);
+        }
+    else
+        for(int i=0; i<10; i++)
+        {
+            QAction *act = new QAction(QString::number(sumOfMemory[i]), this);
+            act->setData(QVariant(i));
+            connect(act, SIGNAL(triggered()), this, SLOT(storeInMemory()));
+            actList.append(act);
+        }
+
+    m->clear();
+    m->addActions(actList);
+}
+
+void Calculator::showMemory()
+{
+    if(sumOfMemory[0])
+        lineEdit->setMemory(true);
+    else
+        lineEdit->setMemory(false);
+    lineEdit->repaint();
+    waitOperand = true;
 }
 
 void Calculator::readMemory()
 {
-    lineEdit->setText(QString::number(sumOfMemory));
+    // поддерживаем все 10 регистров памяти для чтения ...
+    QAction *act = qobject_cast<QAction*>(sender());
+    int i = act ? act->data().toInt() : 0;
+    lineEdit->setText(QString::number(sumOfMemory[i]));
 }
 
 void Calculator::storeInMemory()
 {
-    sumOfMemory = lineEdit->text().toDouble();
+    // ... и для сохранения ...
+    QAction *act = qobject_cast<QAction*>(sender());
+    int i = act ? act->data().toInt() : 0;
+    sumOfMemory[i] = lineEdit->text().toDouble();
+    showMemory();
 }
 
 void Calculator::sumMemory()
 {
-    sumOfMemory += lineEdit->text().toDouble();
+    // ... но складываем и вычитаем только первый регистр
+    sumOfMemory[0] += lineEdit->text().toDouble();
+    showMemory();
+}
+
+void Calculator::minusMemory()
+{
+    sumOfMemory[0] -= lineEdit->text().toDouble();
+    showMemory();
 }

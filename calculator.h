@@ -4,7 +4,7 @@
 #include <QWidget>
 #include "button.h"
 
-class QLineEdit;
+class LineEdit;
 
 class Calculator : public QWidget
 {
@@ -23,20 +23,23 @@ private slots:
     void twoOperandSlot(); // для + - * /
     void unaryOperationSlot(); // для унарных операций
     void resultSlot();
-    void clearMemory();
     void readMemory();
     void storeInMemory();
     void sumMemory();
+    void minusMemory();
+
+    void memoryMenuShow();
 
 private:
     Button *createButton(const QString &text, const char *member,
                          const QKeySequence &key = QKeySequence());
+    void showMemory();
 
-    QLineEdit * lineEdit;
+    LineEdit * lineEdit;
 
-    double sumOfMemory;
-    double sumSoFar;
-    double factorSoFar;
+    qreal sumOfMemory[10];
+    qreal sumSoFar;
+    qreal factorSoFar;
     QString additiveStr;
     QString multipliStr;
     bool waitOperand;
