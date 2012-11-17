@@ -13,8 +13,14 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     calculator.cpp \
-    button.cpp
+    button.cpp \
+    lineedit.cpp
 
 HEADERS  += mainwindow.h \
     calculator.h \
-    button.h
+    button.h \
+    lineedit.h
+
+OTHER_FILES = TODO \
+    README.md \
+    log
