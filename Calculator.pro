@@ -21,6 +21,6 @@ HEADERS  += mainwindow.h \
     button.h \
     lineedit.h
 
-OTHER_FILES = TODO \
+OTHER_FILES += TODO \
     README.md \
     log
