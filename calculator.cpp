@@ -80,7 +80,7 @@ Calculator::Calculator(QWidget *parent) :
     Button *sqrtButton = createButton(tr("Sqrt"), SLOT(unaryOperationSlot()));
     Button *powerButton = createButton(tr("x\xB2"), SLOT(unaryOperationSlot()));
     Button *minusOneDegreeButton = createButton(tr("1/x"), SLOT(unaryOperationSlot()));
-    Button *resultButton = createButton(tr("="), SLOT(resultSlot()), QKeySequence(Qt::Key_Enter));
+    Button *resultButton = createButton(tr("="), SLOT(resultSlot()), QKeySequence(Qt::Key_Return));
 
     gridLayout->addWidget(divideButton, 2, 4);
     gridLayout->addWidget(multiplicationButton, 3, 4);
@@ -195,6 +195,11 @@ void Calculator::twoOperandSlot()
     {
         if(waitOperand) // ещё один костыль
             additiveStr = "";
+        if(!multipliStr.isEmpty())
+        {
+            number = calculate(factorSoFar, number, multipliStr);
+            lineEdit->setText(QString::number(number));
+        }
         multipliStr = operation;
         factorSoFar = number;
     }
