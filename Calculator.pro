@@ -14,13 +14,17 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     calculator.cpp \
     button.cpp \
-    lineedit.cpp
+    lineedit.cpp \
+    bineditor.cpp
 
 HEADERS  += mainwindow.h \
     calculator.h \
     button.h \
-    lineedit.h
+    lineedit.h \
+    bineditor.h
 
 OTHER_FILES += TODO \
     README.md \
     log
+
+FORMS +=
