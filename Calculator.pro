@@ -15,13 +15,15 @@ SOURCES += main.cpp\
     calculator.cpp \
     button.cpp \
     lineedit.cpp \
-    bineditor.cpp
+    bineditor.cpp \
+    numbersystemswitcher.cpp
 
 HEADERS  += mainwindow.h \
     calculator.h \
     button.h \
     lineedit.h \
-    bineditor.h
+    bineditor.h \
+    numbersystemswitcher.h
 
 OTHER_FILES += TODO \
     README.md \
