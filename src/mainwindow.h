@@ -4,7 +4,7 @@
 #include <QtGui/QMainWindow>
 
 class QAction;
-class BinEditor;
+class Calculator;
 
 class MainWindow : public QMainWindow
 {
@@ -15,16 +15,22 @@ public:
     ~MainWindow();
 
 private slots:
-    void showBinEditor();
+    void about();
+    void changeMode();
 
 private:
     void initMenu();
     void initActins();
 
     QAction *exitAct;
-    QAction *showBinEditorAct;
+    QAction *aboutAct;
+    QAction *aboutQtAct;
+    QAction *basicAct;
+    QAction *advanceAct;
+    QAction *financicalAct;
+    QAction *programmingAct;
 
-    BinEditor *binEditor;
+    Calculator *calc;
 };
 
 #endif // MAINWINDOW_H

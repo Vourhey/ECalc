@@ -10,23 +10,20 @@ TARGET = Calculator
 TEMPLATE = app
 
 
-SOURCES += main.cpp\
-        mainwindow.cpp \
-    calculator.cpp \
-    button.cpp \
-    lineedit.cpp \
-    bineditor.cpp \
-    numbersystemswitcher.cpp
+SOURCES += src/main.cpp\
+        src/mainwindow.cpp \
+    src/calculator.cpp \
+    src/button.cpp \
+    src/lineedit.cpp \
+    src/bineditor.cpp \
+    src/numbersystemswitcher.cpp
 
-HEADERS  += mainwindow.h \
-    calculator.h \
-    button.h \
-    lineedit.h \
-    bineditor.h \
-    numbersystemswitcher.h
+HEADERS  += src/mainwindow.h \
+    src/calculator.h \
+    src/button.h \
+    src/lineedit.h \
+    src/bineditor.h \
+    src/numbersystemswitcher.h
 
-OTHER_FILES += TODO \
-    README.md \
-    log
-
-FORMS +=
+OBJECTS_DIR = obj/
+MOC_DIR = moc/

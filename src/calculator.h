@@ -4,7 +4,10 @@
 #include <QWidget>
 #include "button.h"
 
+class QGridLayout;
 class LineEdit;
+class BinEditor;
+class NumberSystemSwitcher;
 
 class Calculator : public QWidget
 {
@@ -12,7 +15,8 @@ class Calculator : public QWidget
 public:
     explicit Calculator(QWidget *parent = 0);
     
-signals:
+public slots:
+    void setMode(int mode = 1); // Basic default
     
 private slots:
     void backspaceSlot();
@@ -31,12 +35,39 @@ private slots:
     void memoryMenuShow();
 
 private:
+    void initDefault();
     Button *createButton(const QString &text, const char *member,
                          const QKeySequence &key = QKeySequence());
     void showMemory();
 
-    LineEdit * lineEdit;
+    // widgets
+    LineEdit *lineEdit;
 
+    Button *backspaceButton;
+    Button *clearButton;
+    Button *clearAllButton;
+    Button *memoryReadButton;
+    Button *memoryStoreButton;
+    Button *memorySumButton;
+    Button *percentButton;
+    Button *numberButton[10];
+    Button *pointButton;
+    Button *plusMinusButton;
+    Button *divideButton;
+    Button *multiplicationButton;
+    Button *minusButton;
+    Button *plusButton;
+    Button *sqrtButton;
+    Button *powerButton;
+    Button *minusOneDegreeButton;
+    Button *resultButton;
+
+    BinEditor *binEditor;
+    NumberSystemSwitcher *numsysSwitcher;
+
+    QGridLayout *mainLayout;
+
+    // for calc
     qreal sumOfMemory[10];
     qreal sumSoFar;
     qreal factorSoFar;

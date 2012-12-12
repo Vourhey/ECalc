@@ -1,9 +1,81 @@
 #include <QtGui>
 #include "calculator.h"
 #include "lineedit.h"
+#include "bineditor.h"
+#include "numbersystemswitcher.h"
+
+/*
+  Схема интерфейса
+  +------------------------------------+
+  | lineEdit                           |
+  +------------------------------------+
+  +------------------------------------+
+  | виджет перевода величин            | // пока в планах
+  | (появляется в advance mode)        |
+  +------------------------------------+
+  +------------------------------------+
+  | виджет перевода из одной системы   |
+  | счисления в другую (в programming) |
+  +------------------------------------+
+  +------------------------------------+
+  | BinEditor (двоичный редактор)      |
+  | появляется в programming           |
+  +------------------------------------+
+  +-----------+ +--------+ +-----------+
+  | backspace | |  clear | | clear all |
+  +-----------+ +--------+ +-----------+
+  +----------------------+ +-----------+
+  | standart buttons     | | option    |
+  |                      | | functions |
+  +----------------------+ +-----------+
+  */
 
 Calculator::Calculator(QWidget *parent) :
     QWidget(parent)
+{
+    initDefault();
+
+    mainLayout = new QGridLayout;
+
+    mainLayout->addWidget(lineEdit, 0, 0, 1, 6);
+
+    mainLayout->addWidget(backspaceButton, 1, 0, 1, 2);
+    mainLayout->addWidget(clearButton, 1, 2, 1, 2);
+    mainLayout->addWidget(clearAllButton, 1, 4, 1, 2);
+
+    mainLayout->addWidget(memoryReadButton, 3, 0);
+    mainLayout->addWidget(memoryStoreButton, 4, 0);
+    mainLayout->addWidget(memorySumButton, 5, 0);
+    mainLayout->addWidget(percentButton, 6, 0);
+
+    int number = 1;
+    for(int i = 5; i > 2; --i)
+        for(int j = 1; j < 4; ++j)
+        {
+            mainLayout->addWidget(numberButton[number], i, j);
+            ++number;
+        }
+
+    mainLayout->addWidget(numberButton[0], 6, 1);
+    mainLayout->addWidget(pointButton, 6, 2);
+    mainLayout->addWidget(plusMinusButton, 6, 3);
+
+    mainLayout->addWidget(divideButton, 3, 4);
+    mainLayout->addWidget(multiplicationButton, 4, 4);
+    mainLayout->addWidget(minusButton, 5, 4);
+    mainLayout->addWidget(plusButton, 6, 4);
+    mainLayout->addWidget(sqrtButton, 3, 5);
+    mainLayout->addWidget(powerButton, 4, 5);
+    mainLayout->addWidget(minusOneDegreeButton, 5, 5);
+    mainLayout->addWidget(resultButton, 6, 5);
+
+    setMode(); // Basic
+
+    setLayout(mainLayout);
+}
+
+// выполняет начальную инициализацию
+void Calculator::initDefault()
 {
     sumSoFar    = 0.0;
     factorSoFar = 0.0;
@@ -12,86 +84,88 @@ Calculator::Calculator(QWidget *parent) :
     for(int i = 0; i < 10; ++i)
         sumOfMemory[i] = 0.0;
 
-    QGridLayout *gridLayout = new QGridLayout;
-
     lineEdit = new LineEdit;
-    gridLayout->addWidget(lineEdit, 0, 0, 1, 6);
 
-    Button *backspaceButton = createButton(tr("Backspace"), SLOT(backspaceSlot()),
+    // выделиться память при необходимости
+    binEditor = 0;
+    numsysSwitcher = 0;
+
+    backspaceButton = createButton(tr("Backspace"), SLOT(backspaceSlot()),
                                            QKeySequence(Qt::Key_Backspace));
-    Button *clearButton = createButton(tr("Clear"), SLOT(clearSlot()));
-    Button *clearAllButton = createButton(tr("Clear All"), SLOT(clearAllSlot()));
-
-    gridLayout->addWidget(backspaceButton, 1, 0, 1, 2);
-    gridLayout->addWidget(clearButton, 1, 2, 1, 2);
-    gridLayout->addWidget(clearAllButton, 1, 4, 1, 2);
+    clearButton = createButton(tr("Clear"), SLOT(clearSlot()));
+    clearAllButton = createButton(tr("Clear All"), SLOT(clearAllSlot()));
 
     // следующие три кнопочки имееют дополнительное мени (popup)
-    Button *memoryReadButton = createButton(tr("MR"), SLOT(readMemory()));
+    memoryReadButton = createButton(tr("MR"), SLOT(readMemory()));
     memoryReadButton->setPopupMode(QToolButton::MenuButtonPopup);
     QMenu *mr = new QMenu(tr("MR"));
     connect(mr, SIGNAL(aboutToShow()), SLOT(memoryMenuShow())); // элементы выстраиваются согласно памяти
     memoryReadButton->setMenu(mr);
 
-    Button *memoryStoreButton = createButton(tr("MS"), SLOT(storeInMemory()));
+    memoryStoreButton = createButton(tr("MS"), SLOT(storeInMemory()));
     memoryStoreButton->setPopupMode(QToolButton::MenuButtonPopup);
     QMenu *ms = new QMenu(tr("MS"));
     connect(ms, SIGNAL(aboutToShow()), SLOT(memoryMenuShow()));
     memoryStoreButton->setMenu(ms);
 
-    Button *memorySumButton = createButton(tr("M+"), SLOT(sumMemory()));
+    memorySumButton = createButton(tr("M+"), SLOT(sumMemory()));
     memorySumButton->setPopupMode(QToolButton::MenuButtonPopup);
     QMenu *m = new QMenu(tr("M-"));
     m->addAction(tr("M-"), this, SLOT(minusMemory()));
     memorySumButton->setMenu(m);
 
-    Button *percentButton = createButton(tr("%"), SLOT(unaryOperationSlot()));
-
-    gridLayout->addWidget(memoryReadButton, 2, 0);
-    gridLayout->addWidget(memoryStoreButton, 3, 0);
-    gridLayout->addWidget(memorySumButton, 4, 0);
-    gridLayout->addWidget(percentButton, 5, 0);
+    percentButton = createButton(tr("%"), SLOT(unaryOperationSlot()));
 
     // цифры
-    int number = 1;
-    for(int i = 4; i > 1; --i)
-        for(int j = 1; j < 4; ++j)
-        {
-            Button *btn = createButton(QString::number(number), SLOT(digitButtonSlot()),
-                                     QKeySequence(QString::number(number)));
-            gridLayout->addWidget(btn, i, j);
-            ++number;
-            if(number == 10) break;
-        }
+    for(int i = 0; i < 10; ++i)
+        numberButton[i] = createButton(QString::number(i), SLOT(digitButtonSlot()),
+                                     QKeySequence(QString::number(i)));
 
-    Button *zeroButton = createButton(tr("0"), SLOT(digitButtonSlot()), QKeySequence(Qt::Key_0));
-    Button *pointButton = createButton(tr("."), SLOT(pointButtonSlot()), QKeySequence(","));
-    Button *plusMinusButton = createButton(tr("\xB1"), SLOT(unaryOperationSlot()));
+    pointButton = createButton(tr("."), SLOT(pointButtonSlot()), QKeySequence(","));
+    plusMinusButton = createButton(tr("\xB1"), SLOT(unaryOperationSlot()));
 
-    gridLayout->addWidget(zeroButton, 5, 1);
-    gridLayout->addWidget(pointButton, 5, 2);
-    gridLayout->addWidget(plusMinusButton, 5, 3);
+    divideButton = createButton(tr("\xF7"), SLOT(twoOperandSlot()), QKeySequence("/"));
+    multiplicationButton = createButton(tr("x"), SLOT(twoOperandSlot()), QKeySequence("*"));
+    minusButton = createButton(tr("-"), SLOT(twoOperandSlot()), QKeySequence(Qt::Key_Minus));
+    plusButton = createButton(tr("+"), SLOT(twoOperandSlot()), QKeySequence(Qt::Key_Plus));
 
-    Button *divideButton = createButton(tr("\xF7"), SLOT(twoOperandSlot()), QKeySequence("/"));
-    Button *multiplicationButton = createButton(tr("x"), SLOT(twoOperandSlot()), QKeySequence("*"));
-    Button *minusButton = createButton(tr("-"), SLOT(twoOperandSlot()), QKeySequence(Qt::Key_Minus));
-    Button *plusButton = createButton(tr("+"), SLOT(twoOperandSlot()), QKeySequence(Qt::Key_Plus));
+    sqrtButton = createButton(tr("Sqrt"), SLOT(unaryOperationSlot()));
+    powerButton = createButton(tr("x\xB2"), SLOT(unaryOperationSlot()));
+    minusOneDegreeButton = createButton(tr("1/x"), SLOT(unaryOperationSlot()));
+    resultButton = createButton(tr("="), SLOT(resultSlot()), QKeySequence(Qt::Key_Return));
+}
 
-    Button *sqrtButton = createButton(tr("Sqrt"), SLOT(unaryOperationSlot()));
-    Button *powerButton = createButton(tr("x\xB2"), SLOT(unaryOperationSlot()));
-    Button *minusOneDegreeButton = createButton(tr("1/x"), SLOT(unaryOperationSlot()));
-    Button *resultButton = createButton(tr("="), SLOT(resultSlot()), QKeySequence(Qt::Key_Return));
+void Calculator::setMode(int mode)
+{
+    mainLayout->removeWidget(binEditor);
+    mainLayout->removeWidget(numsysSwitcher);
+    mainLayout->removeWidget(lineEdit);
+    if(binEditor) binEditor->hide();
+    if(numsysSwitcher) numsysSwitcher->hide();
 
-    gridLayout->addWidget(divideButton, 2, 4);
-    gridLayout->addWidget(multiplicationButton, 3, 4);
-    gridLayout->addWidget(minusButton, 4, 4);
-    gridLayout->addWidget(plusButton, 5, 4);
-    gridLayout->addWidget(sqrtButton, 2, 5);
-    gridLayout->addWidget(powerButton, 3, 5);
-    gridLayout->addWidget(minusOneDegreeButton, 4, 5);
-    gridLayout->addWidget(resultButton, 5, 5);
+    switch(mode)
+    {
+    case 1: // basic        
+        mainLayout->addWidget(lineEdit, 0,0,1,6);
+        break;
+    case 2: // advance
+        mainLayout->addWidget(lineEdit, 0,0,1,6);
 
-    setLayout(gridLayout);
+        if(!numsysSwitcher) numsysSwitcher = new NumberSystemSwitcher;
+        numsysSwitcher->show();
+        mainLayout->addWidget(numsysSwitcher, 2,0,1,6);
+        break;
+    case 3: // financical
+        mainLayout->addWidget(lineEdit, 0,0,1,6);
+        break;
+    case 4: // programming
+        mainLayout->addWidget(lineEdit, 0,0,1,6);
+
+        if(!binEditor) binEditor = new BinEditor;
+        binEditor->show();
+        mainLayout->addWidget(binEditor, 2,0,1,6);
+        break;
+    }
 }
 
 Button *Calculator::createButton(const QString &text, const char *member, const QKeySequence &key)
