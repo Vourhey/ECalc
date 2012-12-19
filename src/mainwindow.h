@@ -1,12 +1,24 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QtGui/QMainWindow>
+#include <QWidget>
 
 class QAction;
-class Calculator;
+class QMenuBar;
+class QVBoxLayout;
+class QHBoxLayout;
 
-class MainWindow : public QMainWindow
+class LineEdit;
+class BasicKeyboard;
+class AdvanceKeyboard;
+class ProgrammingKeyboards;
+class AdditionalProgrammingFuncs;
+class TrigonometryFuncs;
+class BinEditor;
+class NumberSystemSwitcher;
+
+// It's not child of QMainWindow!
+class MainWindow : public QWidget
 {
     Q_OBJECT
     
@@ -19,18 +31,30 @@ private slots:
     void changeMode();
 
 private:
+    void m_init();
     void initMenu();
     void initActins();
+    void initLayout();
+    QMenuBar *menuBar();
+
+    LineEdit *m_lineEdit;
+    BasicKeyboard *m_basicKeyboard;
+    AdvanceKeyboard *m_advanceKeyboard;
+    ProgrammingKeyboards *m_programmingKeyboard;
+    AdditionalProgrammingFuncs *m_additionalFuncs;
+    TrigonometryFuncs *m_trigonometryFuncs;
+    BinEditor *m_binEditor;
+    NumberSystemSwitcher *m_numberSystemSwitcher;
 
     QAction *exitAct;
     QAction *aboutAct;
     QAction *aboutQtAct;
     QAction *basicAct;
     QAction *advanceAct;
-    QAction *financicalAct;
     QAction *programmingAct;
 
-    Calculator *calc;
+    QVBoxLayout *mainLayout;
+    QHBoxLayout *horizontalLayout;
 };
 
 #endif // MAINWINDOW_H

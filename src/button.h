@@ -10,7 +10,6 @@ public:
     explicit Button(const QString &text, QWidget *parent = 0);
     
     QSize sizeHint() const;
-    
 };
 
 #endif // BUTTON_H

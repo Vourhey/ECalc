@@ -13,12 +13,19 @@ public:
     void setOperator(const QString &op);
     void resetOperator();
 
+    void setNumber(qreal n);
+    qreal getNumber() const;
+
+signals:
+    void numberChanged(qreal n);
+
 protected:
     void paintEvent(QPaintEvent *);
 
 private:
     bool memory;
     QString m_operator;
+    qreal displayed;
 };
 
 #endif // LINEEDIT_H

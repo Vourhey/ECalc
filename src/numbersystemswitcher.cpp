@@ -10,6 +10,7 @@ NumberSystemSwitcher::NumberSystemSwitcher(QWidget *parent) :
 
     label = new QLabel;
     label->setTextFormat(Qt::RichText);
+    label->setAlignment(Qt::AlignRight);
 
     comboBox = new QComboBox;
 

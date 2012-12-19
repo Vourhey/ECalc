@@ -9,7 +9,7 @@ LineEdit::LineEdit(QWidget *parent) :
 
     setText(tr("0"));
     setAlignment(Qt::AlignRight);
-    setMaxLength(15);
+    //setMaxLength(15);
     setReadOnly(true);
 
     QFont f = font();
@@ -32,6 +32,19 @@ void LineEdit::resetOperator()
 {
     m_operator = "";
     repaint();
+}
+
+// все, что должно отображаться, должно выводиться через эту функцию
+void LineEdit::setNumber(qreal n)
+{
+    setText(QString::number(n));
+    displayed = n;
+    emit numberChanged(n);
+}
+
+qreal LineEdit::getNumber() const
+{
+    return displayed;
 }
 
 void LineEdit::paintEvent(QPaintEvent *e)

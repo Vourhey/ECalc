@@ -4,20 +4,25 @@
 #include <QWidget>
 #include <QLabel>
 
+class LabelForBinEditor;
+class LineEdit;
+
 class BinEditor : public QWidget
 {
     Q_OBJECT
 public:
-    explicit BinEditor(QWidget *parent = 0);
+    explicit BinEditor(LineEdit *le, QWidget *parent = 0);
 
-signals:
-    void numberChanged(quint64 n);
+public slots:
+    void setNumber(qreal n);
     
 private slots:
     void labelClickSlot(int d, const QString &text);
 
 private:
     quint64 m_number;
+    QVector<LabelForBinEditor*> labels;
+    LineEdit *lineEdit;
 };
 
 // класс нужен для удобства создания BinEditor
