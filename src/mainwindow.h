@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QWidget>
+#include <QList>
 
 class QAction;
 class QMenuBar;
@@ -29,6 +30,11 @@ public:
 private slots:
     void about();
     void changeMode();
+    void clearMemory();
+    void aboutToShowWriteMenu();
+    void aboutToShowReadMenu();
+    void addToMemory();
+    void insertIntoLineEdit();
 
 private:
     void m_init();
@@ -52,9 +58,13 @@ private:
     QAction *basicAct;
     QAction *advanceAct;
     QAction *programmingAct;
+    QAction *clearMemoryAct;
+    QAction *addToMemoryAct;
 
     QVBoxLayout *mainLayout;
     QHBoxLayout *horizontalLayout;
+
+    QList<QAction*> m_memory;
 };
 
 #endif // MAINWINDOW_H

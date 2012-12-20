@@ -67,6 +67,12 @@ void MainWindow::initActins()
     ag->addAction(advanceAct);
     ag->addAction(programmingAct);
     basicAct->setChecked(true);
+
+    clearMemoryAct = new QAction(tr("Clear memory"), this);
+    connect(clearMemoryAct, SIGNAL(triggered()), SLOT(clearMemory()));
+
+    addToMemoryAct = new QAction(tr("New item"), this);
+    connect(addToMemoryAct, SIGNAL(triggered()), SLOT(addToMemory()));
 }
 
 void MainWindow::initMenu()
@@ -80,6 +86,15 @@ void MainWindow::initMenu()
     viewMenu->addAction(basicAct);
 //    viewMenu->addAction(advanceAct);
     viewMenu->addAction(programmingAct);
+
+    QMenu *memoryMenu = mb->addMenu(tr("Memory"));
+
+    QMenu *writeToMenu = memoryMenu->addMenu(tr("Write to"));
+    connect(writeToMenu, SIGNAL(aboutToShow()), SLOT(aboutToShowWriteMenu()));
+    QMenu *readFromMenu = memoryMenu->addMenu(tr("Read from"));
+    connect(readFromMenu, SIGNAL(aboutToShow()), SLOT(aboutToShowReadMenu()));
+
+    memoryMenu->addAction(clearMemoryAct);
 
     QMenu *helpMenu = mb->addMenu(tr("Help"));
     helpMenu->addAction(aboutAct);
@@ -133,6 +148,68 @@ void MainWindow::changeMode()
  //       m_numberSystemSwitcher->hide();
         m_binEditor->hide();
     }
+}
+
+void MainWindow::clearMemory()
+{
+    foreach(QAction *act, m_memory)
+        delete act;
+    m_memory.clear();
+}
+
+void MainWindow::aboutToShowWriteMenu()
+{
+    QMenu *m = qobject_cast<QMenu*>(sender());
+
+    m->clear();
+
+    foreach(QAction *act, m_memory)
+    {
+        act->disconnect();
+        connect(act, SIGNAL(triggered()), SLOT(addToMemory()));
+        m->addAction(act);
+    }
+
+    m->addSeparator();
+    m->addAction(addToMemoryAct);
+}
+
+void MainWindow::aboutToShowReadMenu()
+{
+    QMenu *m = qobject_cast<QMenu*>(sender());
+
+    m->clear();
+
+    foreach(QAction *act, m_memory)
+    {
+        act->disconnect();
+        connect(act, SIGNAL(triggered()), SLOT(insertIntoLineEdit()));
+        m->addAction(act);
+    }
+}
+
+void MainWindow::addToMemory()
+{
+    QAction *act = qobject_cast<QAction*>(sender());
+    QString linetext = m_lineEdit->text();
+
+    if(act == addToMemoryAct)
+    {
+        QAction *nact = new QAction(linetext, this);
+        nact->setData(linetext.toDouble());
+        m_memory.append(nact);
+    }
+    else
+    {
+        act->setText(linetext);
+        act->setData(linetext.toDouble());
+    }
+}
+
+void MainWindow::insertIntoLineEdit()
+{
+    QAction *act = qobject_cast<QAction*>(sender());
+    m_lineEdit->setNumber(act->data().toDouble());
 }
 
 void MainWindow::about()
