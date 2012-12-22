@@ -3,10 +3,9 @@
 #include "lineedit.h"
 
 BasicKeyboard::BasicKeyboard(LineEdit *le, QWidget *parent) :
-    QWidget(parent)
+    QWidget(parent), lineEdit(le)
 {
     initDefault();
-    lineEdit = le;
 
     mainLayout = new QGridLayout;
     mainLayout->setSpacing(0);
@@ -63,7 +62,9 @@ void BasicKeyboard::initDefault()
                                      QKeySequence(QString::number(i)));
     }
 
-    pointButton = createButton(tr("."), SLOT(pointButtonSlot()), QKeySequence(","));
+    pointButton = new Button(tr("."));
+    pointButton->setShortcut(QKeySequence(","));
+    connect(pointButton, SIGNAL(clicked()), lineEdit, SLOT(setPoint()));
 
     divideButton = createButton(tr("\u00F7"), SLOT(twoOperandSlot()), QKeySequence("/"));
     multiplicationButton = createButton(tr("x"), SLOT(twoOperandSlot()), QKeySequence("*"));
@@ -104,12 +105,15 @@ void BasicKeyboard::clearSlot()
 void BasicKeyboard::clearAllSlot()
 {
     lineEdit->setNumber(0);
+    lineEdit->resetOperator();
     sumSoFar = 0.0;
     waitOperand = false;
     additiveStr = "";
     multipliStr = "";
 }
 
+
+// ### TODO ###
 void BasicKeyboard::digitButtonSlot()
 {
     if(waitOperand)
@@ -123,14 +127,6 @@ void BasicKeyboard::digitButtonSlot()
     QString text = lineEdit->text();
     if(text == "0") text.chop(1);
     text.append(btn->text());
-    lineEdit->setNumber(text.toDouble());
-}
-
-void BasicKeyboard::pointButtonSlot()
-{
-    QString text = lineEdit->text();
-    if(!text.contains('.'))
-        text.append('.');
     lineEdit->setNumber(text.toDouble());
 }
 
@@ -171,6 +167,8 @@ void BasicKeyboard::twoOperandSlot()
 
             lineEdit->setNumber(number);
         }
+        else
+            multipliStr = "";
 
         additiveStr = operation;
         sumSoFar = number;
@@ -179,11 +177,11 @@ void BasicKeyboard::twoOperandSlot()
     {
         if(waitOperand) // ещё один костыль
             additiveStr = "";
-        if(!multipliStr.isEmpty())
+     /*   if(!multipliStr.isEmpty())
         {
             number = calculate(factorSoFar, number, multipliStr);
             lineEdit->setNumber(number);
-        }
+        } */
         multipliStr = operation;
         factorSoFar = number;
     }

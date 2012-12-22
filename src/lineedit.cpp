@@ -47,6 +47,12 @@ qreal LineEdit::getNumber() const
     return displayed;
 }
 
+void LineEdit::setPoint()
+{
+    if(!text().contains('.'))
+        setText(text().append('.'));
+}
+
 void LineEdit::paintEvent(QPaintEvent *e)
 {
     QLineEdit::paintEvent(e);
