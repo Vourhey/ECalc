@@ -18,7 +18,6 @@ private slots:
     void clearSlot();
     void clearAllSlot();
     void digitButtonSlot();
-    void pointButtonSlot();
     void twoOperandSlot(); // для + - * /
     void unaryOperationSlot(); // для унарных операций
     void resultSlot();

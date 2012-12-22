@@ -19,6 +19,9 @@ public:
 signals:
     void numberChanged(qreal n);
 
+public slots:
+    void setPoint();
+
 protected:
     void paintEvent(QPaintEvent *);
 
