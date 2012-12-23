@@ -53,7 +53,6 @@ private:
     qreal factorSoFar;
     QString additiveStr;
     QString multipliStr;
-    bool waitOperand;
 };
 
 #endif // BASICKEYBOARD_H

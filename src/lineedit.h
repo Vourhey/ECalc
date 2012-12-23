@@ -14,7 +14,11 @@ public:
     void resetOperator();
 
     void setNumber(qreal n);
+    void setNumber(const QString& n);
     qreal getNumber() const;
+
+    void setWait(bool b);
+    bool waitOperand() const;
 
 signals:
     void numberChanged(qreal n);
@@ -29,6 +33,7 @@ private:
     bool memory;
     QString m_operator;
     qreal displayed;
+    bool m_waitOperand;
 };
 
 #endif // LINEEDIT_H

@@ -5,17 +5,16 @@
 
 class QComboBox;
 class QLabel;
+class LineEdit;
 
 class NumberSystemSwitcher : public QWidget
 {
     Q_OBJECT
 public:
-    explicit NumberSystemSwitcher(QWidget *parent = 0);
-
-public slots:
-    void setNumber(quint64 n);
+    explicit NumberSystemSwitcher(LineEdit *le, QWidget *parent = 0);
 
 private slots:
+    void setNumber(qreal n);
     void updateFromAndTo(int i);
     
 private:
@@ -23,6 +22,7 @@ private:
 
     QComboBox *comboBox;
     QLabel *label;
+    LineEdit *lineEdit;
 
     quint64 m_number;
     qint8 from;

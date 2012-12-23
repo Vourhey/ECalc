@@ -2,12 +2,11 @@
 #include <QLabel>
 #include <QHBoxLayout>
 #include "numbersystemswitcher.h"
+#include "lineedit.h"
 
-NumberSystemSwitcher::NumberSystemSwitcher(QWidget *parent) :
-    QWidget(parent)
+NumberSystemSwitcher::NumberSystemSwitcher(LineEdit *le, QWidget *parent) :
+    QWidget(parent), lineEdit(le), m_number(0)
 {
-    m_number = 0;
-
     label = new QLabel;
     label->setTextFormat(Qt::RichText);
     label->setAlignment(Qt::AlignRight);
@@ -21,15 +20,19 @@ NumberSystemSwitcher::NumberSystemSwitcher(QWidget *parent) :
     connect(comboBox, SIGNAL(currentIndexChanged(int)), SLOT(updateFromAndTo(int)));
     comboBox->setCurrentIndex(2);   // Dec
 
+    connect(lineEdit, SIGNAL(numberChanged(qreal)), SLOT(setNumber(qreal)));
+
     QHBoxLayout *mainlayout = new QHBoxLayout;
     mainlayout->addWidget(comboBox);
     mainlayout->addWidget(label);
     setLayout(mainlayout);
+
+   setNumber(lineEdit->getNumber());
 }
 
-void NumberSystemSwitcher::setNumber(quint64 n)
+void NumberSystemSwitcher::setNumber(qreal n)
 {
-    m_number = n;
+    m_number = static_cast<quint64>(n);
     updateLabel();
 }
 
@@ -38,7 +41,7 @@ void NumberSystemSwitcher::updateLabel()
     QString text = QString("%1%2 = %3%4")
             .arg(QString::number(m_number, from))
             .arg(QString("<sub>%1</sub>").arg(from))
-            .arg(QString::number(m_number, to))
+            .arg(QString::number(m_number, to).toUpper())
             .arg(QString("<sub>%1</sub>").arg(to));
 
     label->setText(text);

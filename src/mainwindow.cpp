@@ -128,24 +128,23 @@ void MainWindow::changeMode()
     if(act == basicAct) b = false;
     else b = true;
 
-/*    if(!m_numberSystemSwitcher)
-        m_numberSystemSwitcher = new NumberSystemSwitcher; */
+    if(!m_numberSystemSwitcher)
+        m_numberSystemSwitcher = new NumberSystemSwitcher(m_lineEdit);
     if(!m_binEditor)
         m_binEditor = new BinEditor(m_lineEdit);
 
     if(b)
     {
- /*       mainLayout->insertWidget(1, m_numberSystemSwitcher);
+        mainLayout->insertWidget(1, m_numberSystemSwitcher);
         mainLayout->insertWidget(2, m_binEditor);
-        m_numberSystemSwitcher->show(); */
-        mainLayout->insertWidget(1, m_binEditor);
+        m_numberSystemSwitcher->show();
         m_binEditor->show();
     }
     else
     {
- //       mainLayout->removeWidget(m_numberSystemSwitcher);
+        mainLayout->removeWidget(m_numberSystemSwitcher);
         mainLayout->removeWidget(m_binEditor);
- //       m_numberSystemSwitcher->hide();
+        m_numberSystemSwitcher->hide();
         m_binEditor->hide();
     }
 }

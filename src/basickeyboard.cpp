@@ -43,7 +43,6 @@ void BasicKeyboard::initDefault()
 {
     sumSoFar    = 0.0;
     factorSoFar = 0.0;
-    waitOperand = false;
 
     for(int i = 0; i < 10; ++i)
         sumOfMemory[i] = 0.0;
@@ -93,21 +92,21 @@ void BasicKeyboard::backspaceSlot()
     QString t = lineEdit->text();
     t.chop(1);
     if(t.isEmpty()) t = tr("0");
-    lineEdit->setNumber(t.toDouble());
+    lineEdit->setNumber(t);
 }
 
 void BasicKeyboard::clearSlot()
 {
     lineEdit->setNumber(0);
-    waitOperand = false;
+    lineEdit->setWait(false);
 }
 
 void BasicKeyboard::clearAllSlot()
 {
     lineEdit->setNumber(0);
     lineEdit->resetOperator();
+    lineEdit->setWait(false);
     sumSoFar = 0.0;
-    waitOperand = false;
     additiveStr = "";
     multipliStr = "";
 }
@@ -116,10 +115,10 @@ void BasicKeyboard::clearAllSlot()
 // ### TODO ###
 void BasicKeyboard::digitButtonSlot()
 {
-    if(waitOperand)
+    if(lineEdit->waitOperand())
     {
-        lineEdit->clear();
-        waitOperand = false;
+        lineEdit->setNumber(0);
+        lineEdit->setWait(false);
     }
 
     Button *btn = qobject_cast<Button*>(sender());
@@ -127,7 +126,7 @@ void BasicKeyboard::digitButtonSlot()
     QString text = lineEdit->text();
     if(text == "0") text.chop(1);
     text.append(btn->text());
-    lineEdit->setNumber(text.toDouble());
+    lineEdit->setNumber(text);
 }
 
 // вспомогательная функция для подсчета
@@ -153,7 +152,7 @@ void BasicKeyboard::twoOperandSlot()
 
     if(operation == tr("+") || operation == tr("-"))
     {
-        if(!waitOperand)    // знаю, говнокод... зато работает
+        if(!lineEdit->waitOperand())    // знаю, говнокод... зато работает
         {
             if(!multipliStr.isEmpty())
             {
@@ -175,7 +174,7 @@ void BasicKeyboard::twoOperandSlot()
     }
     else // divide or multipli
     {
-        if(waitOperand) // ещё один костыль
+        if(lineEdit->waitOperand()) // ещё один костыль
             additiveStr = "";
      /*   if(!multipliStr.isEmpty())
         {
@@ -187,7 +186,7 @@ void BasicKeyboard::twoOperandSlot()
     }
 
     lineEdit->setOperator(operation);
-    waitOperand = true;
+    lineEdit->setWait(true);
 }
 
 void BasicKeyboard::unaryOperationSlot()
@@ -239,5 +238,5 @@ void BasicKeyboard::resultSlot()
     }
 
     lineEdit->resetOperator();
-    waitOperand = true;
+    lineEdit->setWait(true);
 }

@@ -6,6 +6,7 @@ LineEdit::LineEdit(QWidget *parent) :
     QLineEdit(parent)
 {
     memory = false;
+    m_waitOperand = false;
 
     setText(tr("0"));
     setAlignment(Qt::AlignRight);
@@ -34,7 +35,7 @@ void LineEdit::resetOperator()
     repaint();
 }
 
-// все, что должно отображаться, должно выводиться через эту функцию
+// все, что должно отображаться, должно выводиться через эти функции
 void LineEdit::setNumber(qreal n)
 {
     setText(QString::number(n));
@@ -42,9 +43,26 @@ void LineEdit::setNumber(qreal n)
     emit numberChanged(n);
 }
 
+void LineEdit::setNumber(const QString &n)
+{
+    setText(n);
+    displayed = n.toDouble();
+    emit numberChanged(displayed);
+}
+
 qreal LineEdit::getNumber() const
 {
     return displayed;
+}
+
+void LineEdit::setWait(bool b)
+{
+    m_waitOperand = b;
+}
+
+bool LineEdit::waitOperand() const
+{
+    return m_waitOperand;
 }
 
 void LineEdit::setPoint()
