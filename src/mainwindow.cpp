@@ -5,9 +5,8 @@
 #include "numbersystemswitcher.h"
 #include "bineditor.h"
 #include "trigonometryfuncs.h"
-#include "additionalprogrammingfuncs.h"
 #include "advancekeyboard.h"
-#include "programmingkeyboards.h"
+#include "programmingkeyboard.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QWidget(parent)
@@ -132,20 +131,26 @@ void MainWindow::changeMode()
         m_numberSystemSwitcher = new NumberSystemSwitcher(m_lineEdit);
     if(!m_binEditor)
         m_binEditor = new BinEditor(m_lineEdit);
+    if(!m_programmingKeyboard)
+        m_programmingKeyboard = new ProgrammingKeyboard(m_lineEdit);
 
     if(b)
     {
         mainLayout->insertWidget(1, m_numberSystemSwitcher);
         mainLayout->insertWidget(2, m_binEditor);
+        horizontalLayout->insertWidget(1, m_programmingKeyboard);
         m_numberSystemSwitcher->show();
         m_binEditor->show();
+        m_programmingKeyboard->show();
     }
     else
     {
         mainLayout->removeWidget(m_numberSystemSwitcher);
         mainLayout->removeWidget(m_binEditor);
+        horizontalLayout->removeWidget(m_programmingKeyboard);
         m_numberSystemSwitcher->hide();
         m_binEditor->hide();
+        m_programmingKeyboard->hide();
     }
 }
 

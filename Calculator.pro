@@ -9,7 +9,7 @@ QT       += core gui
 TARGET = Calculator
 TEMPLATE = app
 
-CONFIG += debug
+CONFIG += debug_and_release
 
 
 SOURCES += src/main.cpp\
@@ -20,9 +20,9 @@ SOURCES += src/main.cpp\
     src/numbersystemswitcher.cpp \
     src/basickeyboard.cpp \
     src/trigonometryfuncs.cpp \
-    src/additionalprogrammingfuncs.cpp \
     src/advancekeyboard.cpp \
-    src/programmingkeyboards.cpp
+    src/programmingkeyboard.cpp \
+    src/number.cpp
 
 HEADERS  += src/mainwindow.h \
     src/button.h \
@@ -31,9 +31,9 @@ HEADERS  += src/mainwindow.h \
     src/numbersystemswitcher.h \
     src/basickeyboard.h \
     src/trigonometryfuncs.h \
-    src/additionalprogrammingfuncs.h \
     src/advancekeyboard.h \
-    src/programmingkeyboards.h
+    src/programmingkeyboard.h \
+    src/number.h
 
 OBJECTS_DIR = obj/
 MOC_DIR = moc/

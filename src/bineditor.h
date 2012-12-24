@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QLabel>
+#include "number.h"
 
 class LabelForBinEditor;
 class LineEdit;
@@ -14,13 +15,13 @@ public:
     explicit BinEditor(LineEdit *le, QWidget *parent = 0);
 
 public slots:
-    void setNumber(qreal n);
+    void setNumber(Number n);
     
 private slots:
     void labelClickSlot(int d, const QString &text);
 
 private:
-    quint64 m_number;
+    Number m_number;
     QVector<LabelForBinEditor*> labels;
     LineEdit *lineEdit;
 };

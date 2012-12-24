@@ -3,9 +3,9 @@
 
 #include <QWidget>
 #include "button.h"
+#include "lineedit.h"
 
 class QGridLayout;
-class LineEdit;
 
 class BasicKeyboard : public QWidget
 {
@@ -24,8 +24,6 @@ private slots:
 
 private:
     void initDefault();
-    Button *createButton(const QString &text, const char *member,
-                         const QKeySequence &key = QKeySequence());
 
     // widgets
     LineEdit *lineEdit;
@@ -48,9 +46,8 @@ private:
     QGridLayout *mainLayout;
 
     // for calc
-    qreal sumOfMemory[10];
-    qreal sumSoFar;
-    qreal factorSoFar;
+    Number sumSoFar;
+    Number factorSoFar;
     QString additiveStr;
     QString multipliStr;
 };

@@ -15,3 +15,16 @@ QSize Button::sizeHint() const
     size.rwidth() = qMax(size.height(), size.width());
     return size;
 }
+
+// облегчает жизнь. Одной функцией настраиваются все жизнено важные параметры
+Button *Button::createButton(const QString &text, const QObject *obj,
+                             const char *member, const QKeySequence &key,
+                             const QString &tooltip)
+{
+    Button *btn = new Button(text);
+    connect(btn, SIGNAL(clicked()), obj, member);
+
+    if(!key.isEmpty()) btn->setShortcut(key);
+    if(!tooltip.isEmpty()) btn->setToolTip(tooltip);
+    return btn;
+}

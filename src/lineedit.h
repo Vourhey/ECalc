@@ -2,6 +2,7 @@
 #define LINEEDIT_H
 
 #include <QLineEdit>
+#include "number.h"
 
 class LineEdit : public QLineEdit
 {
@@ -13,15 +14,15 @@ public:
     void setOperator(const QString &op);
     void resetOperator();
 
-    void setNumber(qreal n);
+    void setNumber(Number n);
     void setNumber(const QString& n);
-    qreal getNumber() const;
+    Number getNumber() const;
 
     void setWait(bool b);
     bool waitOperand() const;
 
 signals:
-    void numberChanged(qreal n);
+    void numberChanged(Number n);
 
 public slots:
     void setPoint();
@@ -32,7 +33,7 @@ protected:
 private:
     bool memory;
     QString m_operator;
-    qreal displayed;
+    Number displayed;
     bool m_waitOperand;
 };
 

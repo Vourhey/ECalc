@@ -36,9 +36,9 @@ void LineEdit::resetOperator()
 }
 
 // все, что должно отображаться, должно выводиться через эти функции
-void LineEdit::setNumber(qreal n)
+void LineEdit::setNumber(Number n)
 {
-    setText(QString::number(n));
+    setText(n.toString());
     displayed = n;
     emit numberChanged(n);
 }
@@ -50,7 +50,7 @@ void LineEdit::setNumber(const QString &n)
     emit numberChanged(displayed);
 }
 
-qreal LineEdit::getNumber() const
+Number LineEdit::getNumber() const
 {
     return displayed;
 }

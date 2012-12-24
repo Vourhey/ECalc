@@ -12,7 +12,7 @@ class QHBoxLayout;
 class LineEdit;
 class BasicKeyboard;
 class AdvanceKeyboard;
-class ProgrammingKeyboards;
+class ProgrammingKeyboard;
 class AdditionalProgrammingFuncs;
 class TrigonometryFuncs;
 class BinEditor;
@@ -46,7 +46,7 @@ private:
     LineEdit *m_lineEdit;
     BasicKeyboard *m_basicKeyboard;
     AdvanceKeyboard *m_advanceKeyboard;
-    ProgrammingKeyboards *m_programmingKeyboard;
+    ProgrammingKeyboard *m_programmingKeyboard;
     AdditionalProgrammingFuncs *m_additionalFuncs;
     TrigonometryFuncs *m_trigonometryFuncs;
     BinEditor *m_binEditor;

@@ -2,10 +2,10 @@
 #define NUMBERSYSTEMSWITCHER_H
 
 #include <QWidget>
+#include "lineedit.h"
 
 class QComboBox;
 class QLabel;
-class LineEdit;
 
 class NumberSystemSwitcher : public QWidget
 {
@@ -14,7 +14,7 @@ public:
     explicit NumberSystemSwitcher(LineEdit *le, QWidget *parent = 0);
 
 private slots:
-    void setNumber(qreal n);
+    void setNumber(Number n);
     void updateFromAndTo(int i);
     
 private:
@@ -24,7 +24,7 @@ private:
     QLabel *label;
     LineEdit *lineEdit;
 
-    quint64 m_number;
+    Number m_number;
     qint8 from;
     qint8 to;
 };

@@ -1,6 +1,5 @@
 #include <QtGui>
 #include "basickeyboard.h"
-#include "lineedit.h"
 
 BasicKeyboard::BasicKeyboard(LineEdit *le, QWidget *parent) :
     QWidget(parent), lineEdit(le)
@@ -44,20 +43,17 @@ void BasicKeyboard::initDefault()
     sumSoFar    = 0.0;
     factorSoFar = 0.0;
 
-    for(int i = 0; i < 10; ++i)
-        sumOfMemory[i] = 0.0;
-
-    backspaceButton = createButton(tr("\u2190"), SLOT(backspaceSlot()),
+    backspaceButton = Button::createButton(tr("\u2190"), this, SLOT(backspaceSlot()),
                                            QKeySequence(Qt::Key_Backspace));
-    clearButton = createButton(tr("Clear"), SLOT(clearSlot()));
-    clearAllButton = createButton(tr("Clear All"), SLOT(clearAllSlot()));
+    clearButton = Button::createButton(tr("Clear"), this, SLOT(clearSlot()));
+    clearAllButton = Button::createButton(tr("Clear All"), this, SLOT(clearAllSlot()));
 
-    percentButton = createButton(tr("%"), SLOT(unaryOperationSlot()));
+    percentButton = Button::createButton(tr("%"), this, SLOT(unaryOperationSlot()));
 
     // цифры
     for(int i = 0; i < 10; ++i)
     {
-        numberButton[i] = createButton(QString::number(i), SLOT(digitButtonSlot()),
+        numberButton[i] = Button::createButton(QString::number(i), this, SLOT(digitButtonSlot()),
                                      QKeySequence(QString::number(i)));
     }
 
@@ -65,26 +61,17 @@ void BasicKeyboard::initDefault()
     pointButton->setShortcut(QKeySequence(","));
     connect(pointButton, SIGNAL(clicked()), lineEdit, SLOT(setPoint()));
 
-    divideButton = createButton(tr("\u00F7"), SLOT(twoOperandSlot()), QKeySequence("/"));
-    multiplicationButton = createButton(tr("x"), SLOT(twoOperandSlot()), QKeySequence("*"));
-    minusButton = createButton(tr("-"), SLOT(twoOperandSlot()), QKeySequence(Qt::Key_Minus));
-    plusButton = createButton(tr("+"), SLOT(twoOperandSlot()), QKeySequence(Qt::Key_Plus));
+    divideButton = Button::createButton(tr("\u00F7"), this, SLOT(twoOperandSlot()), QKeySequence("/"));
+    multiplicationButton = Button::createButton(tr("x"), this, SLOT(twoOperandSlot()), QKeySequence("*"));
+    minusButton = Button::createButton(tr("-"), this, SLOT(twoOperandSlot()), QKeySequence(Qt::Key_Minus));
+    plusButton = Button::createButton(tr("+"), this, SLOT(twoOperandSlot()), QKeySequence(Qt::Key_Plus));
 
     // TODO найти код символа радикала
-    sqrtButton = createButton(tr("\u221A"), SLOT(unaryOperationSlot()));
+    sqrtButton = Button::createButton(tr("\u221A"), this, SLOT(unaryOperationSlot()));
 
-    powerButton = createButton(tr("x\u00B2"), SLOT(unaryOperationSlot()));
-    minusOneDegreeButton = createButton(tr("1/x"), SLOT(unaryOperationSlot()));
-    resultButton = createButton(tr("="), SLOT(resultSlot()), QKeySequence(Qt::Key_Return));
-}
-
-Button *BasicKeyboard::createButton(const QString &text, const char *member, const QKeySequence &key)
-{
-    Button *btn = new Button(text);
-    connect(btn, SIGNAL(clicked()), member);
-
-    if(!key.isEmpty()) btn->setShortcut(key);
-    return btn;
+    powerButton = Button::createButton(tr("x\u00B2"), this, SLOT(unaryOperationSlot()));
+    minusOneDegreeButton = Button::createButton(tr("1/x"), this, SLOT(unaryOperationSlot()));
+    resultButton = Button::createButton(tr("="), this, SLOT(resultSlot()), QKeySequence(Qt::Key_Return));
 }
 
 void BasicKeyboard::backspaceSlot()
@@ -97,13 +84,13 @@ void BasicKeyboard::backspaceSlot()
 
 void BasicKeyboard::clearSlot()
 {
-    lineEdit->setNumber(0);
+    lineEdit->setNumber(Number());
     lineEdit->setWait(false);
 }
 
 void BasicKeyboard::clearAllSlot()
 {
-    lineEdit->setNumber(0);
+    lineEdit->setNumber(Number());
     lineEdit->resetOperator();
     lineEdit->setWait(false);
     sumSoFar = 0.0;
@@ -117,7 +104,7 @@ void BasicKeyboard::digitButtonSlot()
 {
     if(lineEdit->waitOperand())
     {
-        lineEdit->setNumber(0);
+        lineEdit->setNumber(Number());
         lineEdit->setWait(false);
     }
 
@@ -130,7 +117,7 @@ void BasicKeyboard::digitButtonSlot()
 }
 
 // вспомогательная функция для подсчета
-static qreal calculate(qreal op1, qreal op2, const QString &d)
+static Number calculate(Number op1, Number op2, const QString &d)
 {
     if(d == QObject::tr("+"))
         return op1 + op2;
@@ -145,7 +132,7 @@ static qreal calculate(qreal op1, qreal op2, const QString &d)
 
 void BasicKeyboard::twoOperandSlot()
 {
-    qreal number = lineEdit->getNumber();
+    Number number = lineEdit->getNumber();
 
     Button *btn = qobject_cast<Button*>(sender());
     QString operation = btn->text();
@@ -192,14 +179,14 @@ void BasicKeyboard::twoOperandSlot()
 void BasicKeyboard::unaryOperationSlot()
 {
     Button *btn = qobject_cast<Button*>(sender());
-    qreal number = lineEdit->getNumber();
+    Number number = lineEdit->getNumber();
 
     QString operation = btn->text();
 
     if(operation == tr("\u221A"))
     {
         if(number >= 0.0)   // для пользователя ничего не произойдет
-            number = sqrt(number);
+            number = sqrt(number.toDouble());
     }
     else if(operation == tr("x\u00B2"))
         number = number * number;
@@ -210,7 +197,7 @@ void BasicKeyboard::unaryOperationSlot()
     }
     else if(operation == tr("%"))
     {
-        if(sumSoFar) number = sumSoFar * number / 100;
+        if(sumSoFar != 0) number = number * sumSoFar / 100;
         else number /= 100;
     }
 
@@ -219,7 +206,7 @@ void BasicKeyboard::unaryOperationSlot()
 
 void BasicKeyboard::resultSlot()
 {
-    qreal number = lineEdit->getNumber();
+    Number number = lineEdit->getNumber();
 
     if(!multipliStr.isEmpty())
     {

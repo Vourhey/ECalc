@@ -3,7 +3,7 @@
 #include "lineedit.h"
 
 BinEditor::BinEditor(LineEdit *le, QWidget *parent) :
-    QWidget(parent), m_number(0), lineEdit(le)
+    QWidget(parent), m_number(quint64(0)), lineEdit(le)
 {
     LabelForBinEditor *lbl;
     QGridLayout *gridLayout = new QGridLayout;
@@ -57,7 +57,7 @@ BinEditor::BinEditor(LineEdit *le, QWidget *parent) :
 
     setLayout(gridLayout);
 
-    connect(lineEdit, SIGNAL(numberChanged(qreal)), SLOT(setNumber(qreal)));
+    connect(lineEdit, SIGNAL(numberChanged(Number)), SLOT(setNumber(Number)));
     setNumber(lineEdit->getNumber());
 }
 
@@ -65,30 +65,33 @@ void BinEditor::labelClickSlot(int d, const QString &text)
 {
     quint64 temp = 1;
     temp = temp << d; // смещаем на d бит влево
+    quint64 m_n = m_number.toUInt64();
 
     if(text == tr("0"))
     {
-        m_number = m_number | temp; // устанавливаем бит
+        m_number = m_n | temp; // устанавливаем бит
     }
     else
     {
         temp = ~temp; // инвентируем
-        m_number = m_number & temp;
+        m_number = m_n & temp;
     }
 
-    lineEdit->setNumber(static_cast<qreal>(m_number));
+    lineEdit->setNumber(m_number);
 }
 
-void BinEditor::setNumber(qreal n)
+void BinEditor::setNumber(Number n)
 {
-    if(m_number == static_cast<quint64>(n))
+    if(m_number == n)
         return; // уже установленно
 
-    m_number = static_cast<quint64>(n);
+    m_number = n;
+
+    quint64 m_n = n.toUInt64();
 
     for(int d = 63; d>=0; --d)
     {
-        if((m_number >> d) & 1)
+        if((m_n >> d) & 1)
             labels[63-d]->setText(tr("1"));
         else
             labels[63-d]->setText(tr("0"));
