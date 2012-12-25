@@ -218,6 +218,6 @@ void MainWindow::insertIntoLineEdit()
 
 void MainWindow::about()
 {
-    QMessageBox::about(this, tr("About Calculator"),
-                       tr("Calculator by Vourhey (v0.2)"));
+    QMessageBox::about(this, tr("About ECalc"),
+                       tr("ECalc by Vourhey (v0.2)"));
 }

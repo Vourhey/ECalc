@@ -13,6 +13,7 @@ public:
     Number(qreal n);
     Number(int n);
     Number(quint64 n);
+    Number(const QString &n);
 
     bool isInteger() const; // целое ли число
 
@@ -38,9 +39,14 @@ public:
     friend Number operator / (int, Number);
 
 private:
+    qreal current();
     int precision;  // округление
-    qreal m_number; // собственно число
-//    bool b_integer; // флаг, указывающий на целое число
+    union
+    {
+        qreal m_realNumber;     // вещественное число
+        quint64 m_intNumber;    // целое
+    };
+    bool b_integer; // флаг, указывающий на целое число
     char m_format;  // формат представления числа
 };
 

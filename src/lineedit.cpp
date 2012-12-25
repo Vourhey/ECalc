@@ -46,8 +46,8 @@ void LineEdit::setNumber(Number n)
 void LineEdit::setNumber(const QString &n)
 {
     setText(n);
-    displayed = n.toDouble();
-    emit numberChanged(displayed);
+    displayed = n;
+    emit numberChanged(n);
 }
 
 Number LineEdit::getNumber() const
