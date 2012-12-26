@@ -3,7 +3,7 @@
 #include "lineedit.h"
 
 BinEditor::BinEditor(LineEdit *le, QWidget *parent) :
-    QWidget(parent), m_number(quint64(0)), lineEdit(le)
+    QWidget(parent), m_number(0), lineEdit(le)
 {
     LabelForBinEditor *lbl;
     QGridLayout *gridLayout = new QGridLayout;
@@ -84,6 +84,9 @@ void BinEditor::setNumber(Number n)
 {
     if(m_number == n)
         return; // уже установленно
+
+    if(!n.isUInteger())
+        n = 0;
 
     m_number = n;
 

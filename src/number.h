@@ -12,42 +12,53 @@ public:
     Number();
     Number(qreal n);
     Number(int n);
+    Number(qint64 n);
     Number(quint64 n);
     Number(const QString &n);
 
     bool isInteger() const; // целое ли число
+    bool isUInteger() const;
+    bool isDouble() const;  // true если вещественное
 
-    QString toString() const;
+    QString toString(char format = 'g', int prec = 6) const;
     qreal toDouble() const;
+    qint64 toInt64() const;
     quint64 toUInt64() const;
 
-    void setFormat(char f);
-
-    void setPrecision(int p);
-    int getPrecision() const;
+    Number integer() const;
+    Number fraction() const;
 
     bool operator == (Number);
     bool operator >= (Number);
+    bool operator <= (Number);
     bool operator != (Number);
+    bool operator < (Number);
+    bool operator > (Number);
     Number operator + (Number);
     Number operator - (Number);
+    Number operator - ();
     Number operator * (Number);
     Number operator / (Number);
     Number operator /= (Number);
     Number operator ~();
 
-    friend Number operator / (int, Number);
+ //   friend Number operator / (int, Number);
 
 private:
-    qreal current();
-    int precision;  // округление
+    void setCurrent(qreal n);
+    qreal current() const;
     union
     {
         qreal m_realNumber;     // вещественное число
-        quint64 m_intNumber;    // целое
+        qint64 m_intNumber;     // целое со знаком
+        quint64 m_uintNumber;   // целое без знака
     };
-    bool b_integer; // флаг, указывающий на целое число
-    char m_format;  // формат представления числа
+    /*
+     * i - integer
+     * u - unsigned int
+     * d - double
+     */
+    char m_mode; // флаг, указывающий на целое число
 };
 
 #endif // NUMBER_H

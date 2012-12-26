@@ -1,4 +1,5 @@
 #include <QGridLayout>
+#include <QtCore/qmath.h>
 #include "programmingkeyboard.h"
 #include "button.h"
 #include "lineedit.h"
@@ -84,7 +85,15 @@ void ProgrammingKeyboard::notSlot()
 
 void ProgrammingKeyboard::intFracSlot()
 {
+    Button *btn = qobject_cast<Button*>(sender());
+    QString t = btn->text();
 
+    Number num = lineEdit->getNumber();
+
+    if(t == tr("int"))  // выделяем целую часть
+        lineEdit->setNumber(num.integer());
+    else    // дробную
+        lineEdit->setNumber(num.fraction());
 }
 
 void ProgrammingKeyboard::factorialSlot()
@@ -99,14 +108,33 @@ void ProgrammingKeyboard::insertCodeOfChar()
 
 void ProgrammingKeyboard::logSlot()
 {
+    Button *btn = qobject_cast<Button*>(sender());
+    QString t = btn->text();
 
+    Number num = lineEdit->getNumber();
+    if(num <= 0)
+        num = 1;    // позже нужно будет отдельно сообщать об ошибке
+
+    if(t == tr("log"))  // десятичный log_10
+    {
+        num = log10(num.toDouble());
+        lineEdit->setNumber(num);
+    }
+    else    // натуральный log_e
+    {
+        num = log(num.toDouble());
+        lineEdit->setNumber(num);
+    }
 }
 
 void ProgrammingKeyboard::absSlot()
 {
-
+    Number num = lineEdit->getNumber();
+    if(num < 0) num = - num;
+    lineEdit->setNumber(num);
 }
 
+// следующие функции работают только с quint64 (беззнаковым целым)
 void ProgrammingKeyboard::onesSlot()
 {
 

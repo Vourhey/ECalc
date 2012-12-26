@@ -5,7 +5,7 @@
 #include "lineedit.h"
 
 NumberSystemSwitcher::NumberSystemSwitcher(LineEdit *le, QWidget *parent) :
-    QWidget(parent), lineEdit(le), m_number(quint64(0))
+    QWidget(parent), lineEdit(le), m_number(0)
 {
     label = new QLabel;
     label->setTextFormat(Qt::RichText);
@@ -32,6 +32,8 @@ NumberSystemSwitcher::NumberSystemSwitcher(LineEdit *le, QWidget *parent) :
 
 void NumberSystemSwitcher::setNumber(Number n)
 {
+    if(!n.isUInteger())
+        n = 0;
     m_number = n;
     updateLabel();
 }
@@ -39,9 +41,9 @@ void NumberSystemSwitcher::setNumber(Number n)
 void NumberSystemSwitcher::updateLabel()
 {
     QString text = QString("%1%2 = %3%4")
-            .arg(QString::number(m_number.toUInt64(), from))
+            .arg(QString::number(m_number.toInt64(), from))
             .arg(QString("<sub>%1</sub>").arg(from))
-            .arg(QString::number(m_number.toUInt64(), to).toUpper())
+            .arg(QString::number(m_number.toInt64(), to).toUpper())
             .arg(QString("<sub>%1</sub>").arg(to));
 
     label->setText(text);

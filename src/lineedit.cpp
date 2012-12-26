@@ -5,7 +5,6 @@
 LineEdit::LineEdit(QWidget *parent) :
     QLineEdit(parent)
 {
-    memory = false;
     m_waitOperand = false;
 
     setText(tr("0"));
@@ -16,11 +15,6 @@ LineEdit::LineEdit(QWidget *parent) :
     QFont f = font();
     f.setPointSize(f.pointSize() + 8);
     setFont(f);
-}
-
-void LineEdit::setMemory(bool b)
-{
-    memory = b;
 }
 
 void LineEdit::setOperator(const QString &op)
@@ -79,12 +73,7 @@ void LineEdit::paintEvent(QPaintEvent *e)
 
     // координаты получены экспериментально
 
-    if(memory)  // в углу рисуем букву М, если память не пуста
-    {
-        p.setFont(QFont("Arial", 8));
-        p.drawText(5, 5, 15, 15, Qt::AlignCenter, tr("M"));
-    }
-
+    // ### TODO ###
     if(!m_operator.isEmpty())
     {
         p.setFont(QFont("Arial", 12));

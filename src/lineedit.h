@@ -10,7 +10,6 @@ class LineEdit : public QLineEdit
 public:
     explicit LineEdit(QWidget *parent = 0);
 
-    void setMemory(bool b);
     void setOperator(const QString &op);
     void resetOperator();
 
@@ -31,7 +30,6 @@ protected:
     void paintEvent(QPaintEvent *);
 
 private:
-    bool memory;
     QString m_operator;
     Number displayed;
     bool m_waitOperand;

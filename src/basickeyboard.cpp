@@ -193,7 +193,7 @@ void BasicKeyboard::unaryOperationSlot()
     else if(operation == tr("1/x"))
     {
         if(number != 0)
-            number = 1 / number;
+            number = Number(1) / number;
     }
     else if(operation == tr("%"))
     {
