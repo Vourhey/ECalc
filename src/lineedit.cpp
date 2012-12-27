@@ -15,6 +15,8 @@ LineEdit::LineEdit(QWidget *parent) :
     QFont f = font();
     f.setPointSize(f.pointSize() + 8);
     setFont(f);
+
+    setNumberMode();
 }
 
 void LineEdit::setOperator(const QString &op)
@@ -32,21 +34,47 @@ void LineEdit::resetOperator()
 // все, что должно отображаться, должно выводиться через эти функции
 void LineEdit::setNumber(Number n)
 {
-    setText(n.toString());
+    setText(n.toString(m_numberMode).toUpper());
     displayed = n;
     emit numberChanged(n);
 }
 
-void LineEdit::setNumber(const QString &n)
+void LineEdit::setNumber(const QString &n, int m)
 {
+    if(m != 0)
+        setNumberMode(m);
+    displayed = Number::toNumber(n, m_numberMode);
     setText(n);
-    displayed = n;
-    emit numberChanged(n);
+    emit numberChanged(displayed);
 }
 
 Number LineEdit::getNumber() const
 {
     return displayed;
+}
+
+/*
+ * нужно для programming mode
+ * 10 - decimal
+ * 8  - octal
+ * 16 - hexadecimal
+ *
+ * // todo
+ * 2 - bin
+ */
+void LineEdit::setNumberMode(int m)
+{
+    if(m == m_numberMode)
+        return;
+
+    m_numberMode = m;
+    emit numberModeChanged(m);
+    setNumber(displayed);
+}
+
+int LineEdit::numberMode() const
+{
+    return m_numberMode;
 }
 
 void LineEdit::setWait(bool b)

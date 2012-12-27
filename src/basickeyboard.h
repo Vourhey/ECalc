@@ -21,6 +21,7 @@ private slots:
     void twoOperandSlot(); // для + - * /
     void unaryOperationSlot(); // для унарных операций
     void resultSlot();
+    void enableDigit(int = 10);
 
 private:
     void initDefault();

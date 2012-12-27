@@ -21,13 +21,14 @@ NumberSystemSwitcher::NumberSystemSwitcher(LineEdit *le, QWidget *parent) :
     comboBox->setCurrentIndex(2);   // Dec
 
     connect(lineEdit, SIGNAL(numberChanged(Number)), SLOT(setNumber(Number)));
+    connect(lineEdit, SIGNAL(numberModeChanged(int)), SLOT(changeIndex(int)));
 
     QHBoxLayout *mainlayout = new QHBoxLayout;
     mainlayout->addWidget(comboBox);
     mainlayout->addWidget(label);
     setLayout(mainlayout);
 
-   setNumber(lineEdit->getNumber());
+    setNumber(lineEdit->getNumber());
 }
 
 void NumberSystemSwitcher::setNumber(Number n)
@@ -58,5 +59,15 @@ void NumberSystemSwitcher::updateFromAndTo(int i)
     else if(n == 10) { from = 8; to = 16; }
     else { from = 8; to = 10; }
 
+    lineEdit->setNumberMode(n);
+
     updateLabel();
+}
+
+void NumberSystemSwitcher::changeIndex(int n)
+{
+    if(n == 2) comboBox->setCurrentIndex(0);
+    else if(n == 8) comboBox->setCurrentIndex(1);
+    else if(n == 10) comboBox->setCurrentIndex(2);
+    else comboBox->setCurrentIndex(3);
 }

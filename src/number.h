@@ -20,7 +20,7 @@ public:
     bool isUInteger() const;
     bool isDouble() const;  // true если вещественное
 
-    QString toString(char format = 'g', int prec = 6) const;
+    QString toString(int base = 10, char format = 'f', int prec = 6) const;
     qreal toDouble() const;
     qint64 toInt64() const;
     quint64 toUInt64() const;
@@ -42,7 +42,7 @@ public:
     Number operator /= (Number);
     Number operator ~();
 
- //   friend Number operator / (int, Number);
+    static Number toNumber(const QString &, int = 10);
 
 private:
     void setCurrent(qreal n);

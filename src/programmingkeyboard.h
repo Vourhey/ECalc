@@ -25,6 +25,7 @@ private slots:
     void twosSlot();
     void shlSlot();
     void shrSlot();
+    void enableAF(int b);
 
 private:
     Button *afButton[6];

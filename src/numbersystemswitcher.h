@@ -16,6 +16,7 @@ public:
 private slots:
     void setNumber(Number n);
     void updateFromAndTo(int i);
+    void changeIndex(int n);
     
 private:
     void updateLabel();

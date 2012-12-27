@@ -35,6 +35,9 @@ BasicKeyboard::BasicKeyboard(LineEdit *le, QWidget *parent) :
     mainLayout->addWidget(resultButton, 4, 4);
 
     setLayout(mainLayout);
+
+    connect(lineEdit, SIGNAL(numberModeChanged(int)), SLOT(enableDigit(int)));
+    enableDigit();
 }
 
 // выполняет начальную инициализацию
@@ -98,8 +101,29 @@ void BasicKeyboard::clearAllSlot()
     multipliStr = "";
 }
 
+void BasicKeyboard::enableDigit(int b)
+{
+    if(b == 10)
+    {
+        for(int i=0; i<10; i++)
+            numberButton[i]->setEnabled(true);
+    }
+    else if(b == 8)
+    {
+        for(int i=0; i<8; ++i)
+            numberButton[i]->setEnabled(true);
+        numberButton[8]->setEnabled(false);
+        numberButton[9]->setEnabled(false);
+    }
+    else if(b == 2)
+    {
+        numberButton[0]->setEnabled(true);
+        numberButton[1]->setEnabled(true);
+        for(int i=2; i<10; ++i)
+            numberButton[i]->setEnabled(false);
+    }
+}
 
-// ### TODO ###
 void BasicKeyboard::digitButtonSlot()
 {
     if(lineEdit->waitOperand())

@@ -81,10 +81,10 @@ void MainWindow::initMenu()
     QMenu *fileMenu = mb->addMenu(tr("File"));
     fileMenu->addAction(exitAct);
 
-    QMenu *viewMenu = mb->addMenu(tr("View"));
-    viewMenu->addAction(basicAct);
+    QMenu *modeMenu = mb->addMenu(tr("Mode"));
+    modeMenu->addAction(basicAct);
 //    viewMenu->addAction(advanceAct);
-    viewMenu->addAction(programmingAct);
+    modeMenu->addAction(programmingAct);
 
     QMenu *memoryMenu = mb->addMenu(tr("Memory"));
 
@@ -200,20 +200,20 @@ void MainWindow::addToMemory()
     if(act == addToMemoryAct)
     {
         QAction *nact = new QAction(linetext, this);
-        nact->setData(linetext.toDouble());
+        nact->setData(m_lineEdit->numberMode());
         m_memory.append(nact);
     }
     else
     {
         act->setText(linetext);
-        act->setData(linetext.toDouble());
+        act->setData(m_lineEdit->numberMode());
     }
 }
 
 void MainWindow::insertIntoLineEdit()
 {
     QAction *act = qobject_cast<QAction*>(sender());
-    m_lineEdit->setNumber(act->data().toDouble());
+    m_lineEdit->setNumber(act->text(), act->data().toInt());
 }
 
 void MainWindow::about()

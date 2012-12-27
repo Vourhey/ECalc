@@ -10,8 +10,16 @@ Number::Number()
 
 Number::Number(int n)
 {
-    m_intNumber = n;
-    m_mode = 'i';
+    if(n >= 0)
+    {
+        m_uintNumber = static_cast<quint64>(n);
+        m_mode = 'u';
+    }
+    else
+    {
+        m_intNumber = n;
+        m_mode = 'i';
+    }
 }
 
 Number::Number(qreal n)
@@ -21,8 +29,16 @@ Number::Number(qreal n)
 
 Number::Number(qint64 n)
 {
-    m_intNumber = n;
-    m_mode = 'i';
+    if(n >= 0)
+    {
+        m_uintNumber = static_cast<quint64>(n);
+        m_mode = 'u';
+    }
+    else
+    {
+        m_intNumber = n;
+        m_mode = 'i';
+    }
 }
 
 Number::Number(quint64 n)
@@ -56,14 +72,16 @@ bool Number::isDouble() const
 // ### TODO
 // а как внешние модули будут знать, что именно сейчас double???
 // решить эту проблему
-QString Number::toString(char format, int prec) const
+// ### TODO
+// перевод дробных чисел в системы счисления, отличные от 10
+QString Number::toString(int base, char format, int prec) const
 {
     if(isDouble())
         return QString::number(m_realNumber, format, prec);
     if(isInteger())
-        return QString::number(m_intNumber);
+        return QString::number(m_intNumber, base);
     // иначе
-    return QString::number(m_uintNumber);
+    return QString::number(m_uintNumber, base);
 }
 
 qreal Number::toDouble() const
@@ -92,6 +110,17 @@ quint64 Number::toUInt64() const
     if(isUInteger())
         return m_uintNumber;
     return static_cast<quint64>(qFloor(m_realNumber));
+}
+
+Number Number::toNumber(const QString &s, int b)
+{
+    bool ok;
+    QVariant v(s);
+    if(v.canConvert(QVariant::ULongLong))
+        return s.toULongLong(&ok, b);
+    else if(v.canConvert(QVariant::Int))
+        return s.toInt(&ok, b);
+    return s.toDouble();    // возможны ошибки во всей функции
 }
 
 // Возвращает целую часть

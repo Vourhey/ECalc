@@ -62,11 +62,39 @@ ProgrammingKeyboard::ProgrammingKeyboard(LineEdit *le, QWidget *parent) :
     gridLayout->addWidget(shrButton, 4, 4);
 
     setLayout(gridLayout);
+
+    connect(lineEdit, SIGNAL(numberModeChanged(int)), SLOT(enableAF(int)));
+    enableAF(lineEdit->numberMode());
+}
+
+void ProgrammingKeyboard::enableAF(int b)
+{
+    if(b == 16)
+    {
+        for(int i=0; i<6; ++i)
+            afButton[i]->setEnabled(true);
+    }
+    else
+    {
+        for(int i=0; i<6; ++i)
+            afButton[i]->setEnabled(false);
+    }
 }
 
 void ProgrammingKeyboard::digitSlot()
 {
+    if(lineEdit->waitOperand())
+    {
+        lineEdit->setNumber(Number());
+        lineEdit->setWait(false);
+    }
 
+    Button *btn = qobject_cast<Button*>(sender());
+
+    QString text = lineEdit->text();
+    if(text == "0") text.chop(1);
+    text.append(btn->text());
+    lineEdit->setNumber(text);
 }
 
 void ProgrammingKeyboard::twoOperandSlot()
@@ -98,7 +126,20 @@ void ProgrammingKeyboard::intFracSlot()
 
 void ProgrammingKeyboard::factorialSlot()
 {
-
+    Number num = lineEdit->getNumber();
+    if(num.isUInteger())
+    {
+        quint64 t = 1;
+        quint64 n = num.toUInt64();
+        while(n > 1)
+        {
+            t *= n;
+            --n;
+        }
+        lineEdit->setNumber(Number(t));
+    }
+    // else ### error message ###
+    // ещё выводить сообщение об ошибке, если происходит переполнение
 }
 
 void ProgrammingKeyboard::insertCodeOfChar()
