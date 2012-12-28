@@ -10,6 +10,7 @@ TARGET = ECalc
 TEMPLATE = app
 
 CONFIG += debug_and_release
+TRANSLATIONS += translations/ecalc_ru.ts
 
 
 SOURCES += src/main.cpp\
@@ -19,7 +20,6 @@ SOURCES += src/main.cpp\
     src/bineditor.cpp \
     src/numbersystemswitcher.cpp \
     src/basickeyboard.cpp \
-#    src/trigonometryfuncs.cpp \
 #    src/advancekeyboard.cpp \
     src/programmingkeyboard.cpp \
     src/number.cpp
@@ -30,7 +30,6 @@ HEADERS  += src/mainwindow.h \
     src/bineditor.h \
     src/numbersystemswitcher.h \
     src/basickeyboard.h \
-#    src/trigonometryfuncs.h \
 #    src/advancekeyboard.h \
     src/programmingkeyboard.h \
     src/number.h

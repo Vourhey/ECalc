@@ -1,5 +1,7 @@
 #include <QtGui/QApplication>
 #include <QTextCodec>
+#include <QTranslator>
+#include <QLocale>
 #include "mainwindow.h"
 
 int main(int argc, char *argv[])
@@ -8,6 +10,9 @@ int main(int argc, char *argv[])
     QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF_8"));
 
     QApplication a(argc, argv);
+    QTranslator myTranslator;
+    myTranslator.load("translations/ecalc_" + QLocale::system().name());
+    a.installTranslator(&myTranslator);
     MainWindow w;
     w.show();
     

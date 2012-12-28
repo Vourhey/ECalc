@@ -47,11 +47,13 @@ void BasicKeyboard::initDefault()
     factorSoFar = 0.0;
 
     backspaceButton = Button::createButton(tr("\u2190"), this, SLOT(backspaceSlot()),
-                                           QKeySequence(Qt::Key_Backspace));
-    clearButton = Button::createButton(tr("Clear"), this, SLOT(clearSlot()));
+                                           QKeySequence(Qt::Key_Backspace), tr("Backspace"));
+    clearButton = Button::createButton(tr("Clear"), this, SLOT(clearSlot()),
+                                       QKeySequence(Qt::Key_Escape), tr("Clear display"));
     clearAllButton = Button::createButton(tr("Clear All"), this, SLOT(clearAllSlot()));
 
-    percentButton = Button::createButton(tr("%"), this, SLOT(unaryOperationSlot()));
+    percentButton = Button::createButton(tr("%"), this, SLOT(unaryOperationSlot()),
+                                         QKeySequence(Qt::Key_Percent), tr("Percent"));
 
     // цифры
     for(int i = 0; i < 10; ++i)
@@ -60,21 +62,24 @@ void BasicKeyboard::initDefault()
                                      QKeySequence(QString::number(i)));
     }
 
-    pointButton = new Button(tr("."));
-    pointButton->setShortcut(QKeySequence(","));
-    connect(pointButton, SIGNAL(clicked()), lineEdit, SLOT(setPoint()));
-
-    divideButton = Button::createButton(tr("\u00F7"), this, SLOT(twoOperandSlot()), QKeySequence("/"));
-    multiplicationButton = Button::createButton(tr("x"), this, SLOT(twoOperandSlot()), QKeySequence("*"));
-    minusButton = Button::createButton(tr("-"), this, SLOT(twoOperandSlot()), QKeySequence(Qt::Key_Minus));
-    plusButton = Button::createButton(tr("+"), this, SLOT(twoOperandSlot()), QKeySequence(Qt::Key_Plus));
-
-    // TODO найти код символа радикала
-    sqrtButton = Button::createButton(tr("\u221A"), this, SLOT(unaryOperationSlot()));
-
-    powerButton = Button::createButton(tr("x\u00B2"), this, SLOT(unaryOperationSlot()));
-    minusOneDegreeButton = Button::createButton(tr("1/x"), this, SLOT(unaryOperationSlot()));
-    resultButton = Button::createButton(tr("="), this, SLOT(resultSlot()), QKeySequence(Qt::Key_Return));
+    pointButton = Button::createButton(tr(","), lineEdit, SLOT(setPoint()),
+                                       QKeySequence(","));
+    divideButton = Button::createButton(tr("\u00F7"), this, SLOT(twoOperandSlot()),
+                                        QKeySequence("/"), tr("Division"));
+    multiplicationButton = Button::createButton(tr("x"), this, SLOT(twoOperandSlot()),
+                                                QKeySequence("*"), tr("Multiplication"));
+    minusButton = Button::createButton(tr("-"), this, SLOT(twoOperandSlot()),
+                                       QKeySequence(Qt::Key_Minus), tr("Subtract"));
+    plusButton = Button::createButton(tr("+"), this, SLOT(twoOperandSlot()),
+                                      QKeySequence(Qt::Key_Plus), tr("Add"));
+    sqrtButton = Button::createButton(tr("\u221A"), this, SLOT(unaryOperationSlot()),
+                                      QKeySequence(tr("Ctrl+R")), tr("Root"));
+    powerButton = Button::createButton(tr("x\u00B2"), this, SLOT(unaryOperationSlot()),
+                                       QKeySequence(tr("Ctrl+2")), tr("Square"));
+    minusOneDegreeButton = Button::createButton(tr("1/x"), this, SLOT(unaryOperationSlot()),
+                                                QKeySequence(tr("Ctrl+I")), tr("Invert"));
+    resultButton = Button::createButton(tr("="), this, SLOT(resultSlot()),
+                                        QKeySequence(Qt::Key_Return));
 }
 
 void BasicKeyboard::backspaceSlot()
@@ -156,8 +161,9 @@ static Number calculate(Number op1, Number op2, const QString &d)
 
 void BasicKeyboard::twoOperandSlot()
 {
-    Number number = lineEdit->getNumber();
+    lineEdit->emitCalculateAll();
 
+    Number number = lineEdit->getNumber();
     Button *btn = qobject_cast<Button*>(sender());
     QString operation = btn->text();
 
@@ -248,6 +254,7 @@ void BasicKeyboard::resultSlot()
         sumSoFar = 0.0;
     }
 
+    lineEdit->emitCalculateAll();
     lineEdit->resetOperator();
     lineEdit->setWait(true);
 }

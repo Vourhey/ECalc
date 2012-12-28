@@ -4,12 +4,40 @@
 #include "basickeyboard.h"
 #include "numbersystemswitcher.h"
 #include "bineditor.h"
-#include "trigonometryfuncs.h"
 #include "advancekeyboard.h"
 #include "programmingkeyboard.h"
 
+AboutDialog::AboutDialog(QWidget *parent)
+    : QDialog(parent)
+{
+    this->setWindowTitle(tr("About ECalc"));
+    lb = new QLabel(tr("Calculator with programming mode.<br>"
+                       "v0.3<br>"
+                       "This release corresponds to the number e = 2.7<br>"
+                       "Source is availible at "
+                       "<a href=\"https://github.com/Vourhey/ECalc\">https://github.com/Vourhey/ECalc</a> <br>"
+                       "Project created 2012-11-14 by Vadim Manaenko"));
+    lb->setTextFormat(Qt::RichText);
+    lb->setAlignment(Qt::AlignCenter);
+
+    closeButton = new QPushButton(tr("Close"));
+    connect(closeButton, SIGNAL(clicked()), SLOT(accept()));
+
+    QHBoxLayout *hbox = new QHBoxLayout;
+    QVBoxLayout *vbox = new QVBoxLayout;
+
+    hbox->addStretch();
+    hbox->addWidget(closeButton);
+    vbox->addWidget(lb);
+    vbox->addLayout(hbox);
+
+    setLayout(vbox);
+}
+
+// ===========================================
+
 MainWindow::MainWindow(QWidget *parent)
-    : QWidget(parent)
+    : QWidget(parent), aboutDialog(0)
 {
     m_init();
     initLayout();
@@ -28,8 +56,6 @@ void MainWindow::m_init()
 
     m_advanceKeyboard = 0;
     m_programmingKeyboard = 0;
-    m_additionalFuncs = 0;
-    m_trigonometryFuncs = 0;
     m_binEditor = 0;
     m_numberSystemSwitcher = 0;
 }
@@ -218,6 +244,10 @@ void MainWindow::insertIntoLineEdit()
 
 void MainWindow::about()
 {
-    QMessageBox::about(this, tr("About ECalc"),
-                       tr("ECalc by Vourhey (v0.2)"));
+    if(!aboutDialog)
+    {
+        aboutDialog = new AboutDialog;
+    }
+
+    aboutDialog->exec();
 }

@@ -42,9 +42,9 @@ void NumberSystemSwitcher::setNumber(Number n)
 void NumberSystemSwitcher::updateLabel()
 {
     QString text = QString("%1%2 = %3%4")
-            .arg(QString::number(m_number.toInt64(), from))
+            .arg(QString::number(m_number.toUInt64(), from))
             .arg(QString("<sub>%1</sub>").arg(from))
-            .arg(QString::number(m_number.toInt64(), to).toUpper())
+            .arg(QString::number(m_number.toUInt64(), to).toUpper())
             .arg(QString("<sub>%1</sub>").arg(to));
 
     label->setText(text);

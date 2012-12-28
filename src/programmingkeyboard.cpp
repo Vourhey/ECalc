@@ -1,11 +1,55 @@
 #include <QGridLayout>
 #include <QtCore/qmath.h>
+#include <QPushButton>
 #include "programmingkeyboard.h"
 #include "button.h"
 #include "lineedit.h"
 
+InsertCharDialog::InsertCharDialog(QWidget *parent)
+    : QDialog (parent)
+{
+    le =  new QLineEdit;
+    le->setMaxLength(1);    // только один символ
+    connect(le, SIGNAL(textEdited(QString)), SLOT(enableButton(QString)));
+
+    cancelBtn = new QPushButton(tr("Cancel"));
+    connect(cancelBtn, SIGNAL(clicked()), SLOT(reject()));
+
+    insertBtn = new QPushButton(tr("Insert"));
+    connect(insertBtn, SIGNAL(clicked()), SLOT(accept()));
+    enableButton(le->text());
+
+    QVBoxLayout *vbox = new QVBoxLayout;
+    QHBoxLayout *hbox = new QHBoxLayout;
+
+    hbox->addWidget(cancelBtn);
+    hbox->addWidget(insertBtn);
+
+    vbox->addWidget(le);
+    vbox->addLayout(hbox);
+
+    setLayout(vbox);
+}
+
+Number InsertCharDialog::getCharCode()
+{
+    QString t = le->text();
+    QChar c = t[0];
+    return Number(c.unicode());
+}
+
+void InsertCharDialog::enableButton(const QString &str)
+{
+    if(str.isEmpty())
+        insertBtn->setEnabled(false);
+    else
+        insertBtn->setEnabled(true);
+}
+
+// ======================================================================
+
 ProgrammingKeyboard::ProgrammingKeyboard(LineEdit *le, QWidget *parent) :
-    QWidget(parent), lineEdit(le)
+    QWidget(parent), lineEdit(le), dialog(0)
 {
     QGridLayout *gridLayout = new QGridLayout;
     gridLayout->setSpacing(0);
@@ -17,26 +61,42 @@ ProgrammingKeyboard::ProgrammingKeyboard(LineEdit *le, QWidget *parent) :
     afButton[4] = Button::createButton(tr("E"), this, SLOT(digitSlot()));
     afButton[5] = Button::createButton(tr("F"), this, SLOT(digitSlot()));
 
-    andButton = Button::createButton(tr("AND"), this, SLOT(twoOperandSlot()), QKeySequence(), tr("AND"));
-    orButton = Button::createButton(tr("OR"), this, SLOT(twoOperandSlot()), QKeySequence(), tr("OR"));
-    xorButton = Button::createButton(tr("XOR"), this, SLOT(twoOperandSlot()), QKeySequence(), tr("XOR"));
-    notButton = Button::createButton(tr("NOT"), this, SLOT(notSlot()), QKeySequence(), tr("NOT"));
-    modButton = Button::createButton(tr("mod"), this, SLOT(twoOperandSlot()));
+    andButton = Button::createButton(tr("AND"), this, SLOT(twoOperandSlot()),
+                                     QKeySequence(), tr("Logical And"));
+    orButton = Button::createButton(tr("OR"), this, SLOT(twoOperandSlot()),
+                                    QKeySequence(), tr("Logical Or"));
+    xorButton = Button::createButton(tr("XOR"), this, SLOT(twoOperandSlot()),
+                                     QKeySequence(), tr("Logical Xor"));
+    notButton = Button::createButton(tr("NOT"), this, SLOT(notSlot()),
+                                     QKeySequence(), tr("Logical Not"));
+    modButton = Button::createButton(tr("mod"), this, SLOT(twoOperandSlot()),
+                                     QKeySequence(tr("|")), tr("Modulo"));
 
-    logButton = Button::createButton(tr("log"), this, SLOT(logSlot()));
-    lnButton = Button::createButton(tr("ln"), this, SLOT(logSlot()));
+    logButton = Button::createButton(tr("log"), this, SLOT(logSlot()),
+                                     QKeySequence(), tr("Logarihm to base 10"));
+    lnButton = Button::createButton(tr("ln"), this, SLOT(logSlot()),
+                                    QKeySequence(), tr("Logarihm to base e"));
 
-    intButton = Button::createButton(tr("int"), this, SLOT(intFracSlot()));
-    fracButton = Button::createButton(tr("frac"), this, SLOT(intFracSlot()));
+    intButton = Button::createButton(tr("int"), this, SLOT(intFracSlot()),
+                                     QKeySequence(), tr("Integer"));
+    fracButton = Button::createButton(tr("frac"), this, SLOT(intFracSlot()),
+                                      QKeySequence(), tr("Fraction"));
 
-    factorialButton = Button::createButton(tr("x!"), this, SLOT(factorialSlot()));
-    absButton = Button::createButton(tr("|x|"), this, SLOT(absSlot()));
-    charButton = Button::createButton(tr("a\u0301"), this, SLOT(insertCodeOfChar()));
-    onesButton = Button::createButton(tr("ones"), this, SLOT(onesSlot()));
-    twosButton = Button::createButton(tr("twos"), this, SLOT(twosSlot()));
+    factorialButton = Button::createButton(tr("x!"), this, SLOT(factorialSlot()),
+                                           QKeySequence(tr("!")), tr("Factorial"));
+    absButton = Button::createButton(tr("|x|"), this, SLOT(absSlot()),
+                                     QKeySequence(), tr("Absolute value"));
+    charButton = Button::createButton(tr("a\u0301"), this, SLOT(insertCodeOfChar()),
+                                      QKeySequence(), tr("Insert character code"));
+    onesButton = Button::createButton(tr("ones"), this, SLOT(onesSlot()),
+                                      QKeySequence(), tr("One's complement"));
+    twosButton = Button::createButton(tr("twos"), this, SLOT(twosSlot()),
+                                      QKeySequence(), tr("Two's complement"));
 
-    shlButton = Button::createButton(tr("<<"), this, SLOT(shlSlot()));
-    shrButton = Button::createButton(tr(">>"), this, SLOT(shrSlot()));
+    shlButton = Button::createButton(tr("<<"), this, SLOT(shlSlot()),
+                                     QKeySequence(), tr("Shift left"));
+    shrButton = Button::createButton(tr(">>"), this, SLOT(shrSlot()),
+                                     QKeySequence(), tr("Shift right"));
 
     gridLayout->addWidget(afButton[3], 0, 0);
     gridLayout->addWidget(afButton[2], 1, 0);
@@ -63,6 +123,7 @@ ProgrammingKeyboard::ProgrammingKeyboard(LineEdit *le, QWidget *parent) :
 
     setLayout(gridLayout);
 
+    connect(lineEdit, SIGNAL(calculateAll()), SLOT(resultSlot()));
     connect(lineEdit, SIGNAL(numberModeChanged(int)), SLOT(enableAF(int)));
     enableAF(lineEdit->numberMode());
 }
@@ -97,9 +158,53 @@ void ProgrammingKeyboard::digitSlot()
     lineEdit->setNumber(text);
 }
 
+static Number calculate(Number n1, Number n2, const QString &op)
+{
+    if(op == QObject::tr("AND"))
+        return n1 & n2;
+    else if(op == QObject::tr("OR"))
+        return n1 | n2;
+    else if(op == QObject::tr("XOR"))
+        return n1 ^ n2;
+    // else
+    return n1 % n2; // mod
+}
+
 void ProgrammingKeyboard::twoOperandSlot()
 {
+    lineEdit->emitCalculateAll();
 
+    Number num = lineEdit->getNumber();
+    Button *btn = qobject_cast<Button*>(sender());
+    QString operation = btn->text();
+
+    if(!lineEdit->waitOperand())
+    {
+        if(!operatorStr.isEmpty())
+        {
+            num = calculate(sumSoFar, num, operatorStr);
+            lineEdit->setNumber(num);
+        }
+    }
+    else
+        operatorStr = "";
+
+    operatorStr = operation;
+    sumSoFar = num;
+    lineEdit->setOperator(operation);
+    lineEdit->setWait(true);
+}
+
+void ProgrammingKeyboard::resultSlot()
+{
+    Number num = lineEdit->getNumber();
+    if(!operatorStr.isEmpty())
+    {
+        num = calculate(sumSoFar, num, operatorStr);
+        lineEdit->setNumber(num);
+        sumSoFar = 0;
+        operatorStr = "";
+    }
 }
 
 void ProgrammingKeyboard::notSlot()
@@ -144,7 +249,13 @@ void ProgrammingKeyboard::factorialSlot()
 
 void ProgrammingKeyboard::insertCodeOfChar()
 {
+    if(!dialog)
+    {
+        dialog = new InsertCharDialog;
+    }
 
+    dialog->exec();
+    lineEdit->setNumber(dialog->getCharCode());
 }
 
 void ProgrammingKeyboard::logSlot()
@@ -178,20 +289,28 @@ void ProgrammingKeyboard::absSlot()
 // следующие функции работают только с quint64 (беззнаковым целым)
 void ProgrammingKeyboard::onesSlot()
 {
-
+    // простое инвентирование
+    Number num = lineEdit->getNumber();
+    lineEdit->setNumber(~num);
 }
 
 void ProgrammingKeyboard::twosSlot()
 {
-
+    // инвертировать и прибавить 1
+    Number num = lineEdit->getNumber();
+    lineEdit->setNumber(~num + 1);
 }
 
 void ProgrammingKeyboard::shlSlot()
 {
-
+    Number num = lineEdit->getNumber();
+    num = num << 1;
+    lineEdit->setNumber(num);
 }
 
 void ProgrammingKeyboard::shrSlot()
 {
-
+    Number num = lineEdit->getNumber();
+    num = num >> 1;
+    lineEdit->setNumber(num);
 }

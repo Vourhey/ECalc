@@ -41,6 +41,12 @@ public:
     Number operator / (Number);
     Number operator /= (Number);
     Number operator ~();
+    Number operator &(Number);
+    Number operator |(Number);
+    Number operator ^(Number);
+    Number operator %(Number);
+    Number operator << (Number);
+    Number operator >> (Number);
 
     static Number toNumber(const QString &, int = 10);
 

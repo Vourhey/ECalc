@@ -273,17 +273,56 @@ Number Number::operator ~()
 {
     if(isUInteger())
         return ~m_uintNumber;
+    return Number();  // придумать систему отчета об ошибках
+}
+
+Number Number::operator &(Number n)
+{
+    if(isUInteger() && n.isUInteger())
+        return m_uintNumber & n.m_uintNumber;
     return Number();
 }
 
-// TODO
-/*
-Number operator /(int i, Number n)
+Number Number::operator |(Number n)
 {
-    qreal t = n.current();
-    if(n.isInteger())
-        t = i / n.m_intNumber;
-    else
-        t = i / n.m_realNumber;
-    return Number(t);
-}*/
+    if(isUInteger() && n.isUInteger())
+        return m_uintNumber | n.m_uintNumber;
+    return Number();
+}
+
+Number Number::operator ^(Number n)
+{
+    if(isUInteger() && n.isUInteger())
+        return m_uintNumber ^ n.m_uintNumber;
+    return Number();
+}
+
+Number Number::operator %(Number n)
+{
+    // сейчас буду говнокодить
+    if(isUInteger() && n.isUInteger())
+        return m_uintNumber % n.m_uintNumber;
+    else if(isUInteger() && n.isInteger())
+        return m_uintNumber % n.m_intNumber;
+    else if(isInteger() && n.isUInteger())
+        return m_intNumber % n.m_uintNumber;
+    return m_intNumber % n.m_intNumber;
+}
+
+Number Number::operator <<(Number n)
+{
+    if(isInteger())
+        return m_intNumber << n.m_uintNumber;
+    else if(isUInteger())
+        return m_uintNumber << n.m_uintNumber;
+    return Number();
+}
+
+Number Number::operator >>(Number n)
+{
+    if(isInteger())
+        return m_intNumber >> n.m_uintNumber;
+    else if(isUInteger())
+        return m_uintNumber >> n.m_uintNumber;
+    return Number();
+}

@@ -93,6 +93,11 @@ void LineEdit::setPoint()
         setText(text().append('.'));
 }
 
+void LineEdit::emitCalculateAll()
+{
+    emit calculateAll();
+}
+
 void LineEdit::paintEvent(QPaintEvent *e)
 {
     QLineEdit::paintEvent(e);

@@ -1,4 +1,19 @@
-Calculator
+## ECalc
 
-Это просто калькулятор на Qt
-(такой же вы найдете в примерах к библиотеке Qt)
+
+Калькулятор с режимом для программистов.
+Для сборки выполните следующее:
+
+
+`qmake
+make -f Makefile.Release`
+
+
+
+Для сборки переводов
+
+
+`lrelease ECalc.pro`
+
+
+Vadim Manaenko: <vadim.razorq@gmail.com>

@@ -22,9 +22,12 @@ public:
     void setWait(bool b);
     bool waitOperand() const;
 
+    void emitCalculateAll();
+
 signals:
     void numberChanged(Number n);
     void numberModeChanged(int base);
+    void calculateAll();    // emited when result button press
 
 public slots:
     void setPoint();
