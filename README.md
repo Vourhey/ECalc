@@ -5,8 +5,8 @@
 Для сборки выполните следующее:
 
 
-`qmake
-make -f Makefile.Release`
+`qmake`      
+`make -f Makefile.Release`
 
 
 
