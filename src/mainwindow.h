@@ -27,9 +27,12 @@ public:
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+protected:
+    void closeEvent(QCloseEvent *);
+
 private slots:
     void about();
-    void changeMode();
+    void changeMode(int = -1);
     void clearMemory();
     void aboutToShowWriteMenu();
     void aboutToShowReadMenu();
@@ -41,6 +44,7 @@ private:
     void initMenu();
     void initActins();
     void initLayout();
+    void restoreState();
     QMenuBar *menuBar();
 
     LineEdit *m_lineEdit;
@@ -64,6 +68,12 @@ private:
 
     QList<QAction*> m_memory;
     AboutDialog *aboutDialog;
+
+    /* 0 - Basic
+     * 1 - Advance
+     * 2 - Programming
+     */
+    int m_mode;
 };
 
 class AboutDialog : public QDialog

@@ -3,6 +3,7 @@
 
 #include <QtGlobal>
 #include <QString>
+#include <QIODevice>
 
 // Представляет число
 // упрощает работу с целыми и дробными числами в разных системах счисления
@@ -50,6 +51,9 @@ public:
 
     static Number toNumber(const QString &, int = 10);
 
+    friend QDataStream &operator<<(QDataStream &to, const Number &num);
+    friend QDataStream &operator>>(QDataStream &from, Number &num);
+
 private:
     void setCurrent(qreal n);
     qreal current() const;
@@ -64,7 +68,7 @@ private:
      * u - unsigned int
      * d - double
      */
-    char m_mode; // флаг, указывающий на целое число
+    qint8 m_mode;
 };
 
 #endif // NUMBER_H

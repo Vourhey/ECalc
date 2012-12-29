@@ -24,6 +24,9 @@ public:
 
     void emitCalculateAll();
 
+    QByteArray saveState() const;
+    void restoreState(const QByteArray &ba);
+
 signals:
     void numberChanged(Number n);
     void numberModeChanged(int base);

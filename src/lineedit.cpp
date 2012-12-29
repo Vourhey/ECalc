@@ -67,6 +67,9 @@ void LineEdit::setNumberMode(int m)
     if(m == m_numberMode)
         return;
 
+    if(m <= 0 || m > 16)
+        return;
+
     m_numberMode = m;
     emit numberModeChanged(m);
     setNumber(displayed);
@@ -96,6 +99,23 @@ void LineEdit::setPoint()
 void LineEdit::emitCalculateAll()
 {
     emit calculateAll();
+}
+
+QByteArray LineEdit::saveState() const
+{
+    QByteArray ba;
+    QDataStream stream (&ba, QIODevice::ReadWrite);
+
+    stream << displayed;
+    return ba;
+}
+
+void LineEdit::restoreState(const QByteArray &ba)
+{
+    Number num;
+    QDataStream stream (ba);
+    stream >> num;
+    setNumber(num);
 }
 
 void LineEdit::paintEvent(QPaintEvent *e)

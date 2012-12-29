@@ -4,8 +4,8 @@
 
 Number::Number()
 {
-    m_intNumber = 0;
-    m_mode = 'i';
+    m_uintNumber = 0;
+    m_mode = qint8('u');
 }
 
 Number::Number(int n)
@@ -13,12 +13,12 @@ Number::Number(int n)
     if(n >= 0)
     {
         m_uintNumber = static_cast<quint64>(n);
-        m_mode = 'u';
+        m_mode = qint8('u');
     }
     else
     {
         m_intNumber = n;
-        m_mode = 'i';
+        m_mode = qint8('i');
     }
 }
 
@@ -32,19 +32,19 @@ Number::Number(qint64 n)
     if(n >= 0)
     {
         m_uintNumber = static_cast<quint64>(n);
-        m_mode = 'u';
+        m_mode = qint8('u');
     }
     else
     {
         m_intNumber = n;
-        m_mode = 'i';
+        m_mode = qint8('i');
     }
 }
 
 Number::Number(quint64 n)
 {
     m_uintNumber = n;
-    m_mode = 'u';
+    m_mode = qint8('u');
 }
 
 Number::Number(const QString &n)
@@ -55,17 +55,17 @@ Number::Number(const QString &n)
 // целое ли число
 bool Number::isInteger() const
 {
-    return m_mode == 'i';
+    return m_mode == qint8('i');
 }
 
 bool Number::isUInteger() const
 {
-    return m_mode == 'u';
+    return m_mode == qint8('u');
 }
 
 bool Number::isDouble() const
 {
-    return m_mode == 'd';
+    return m_mode == qint8('d');
 }
 
 // format и prec указываются только для double числа
@@ -146,17 +146,17 @@ void Number::setCurrent(qreal n)
         if(n < 0)
         {
             m_intNumber = static_cast<qint64>(n);
-            m_mode = 'i';
+            m_mode = qint8('i');
         }
         else    // unsigned
         {
             m_uintNumber = static_cast<quint64>(n);
-            m_mode = 'u';
+            m_mode = qint8('u');
         }
     }
     else
     {
-        m_mode = 'd';
+        m_mode = qint8('d');
         m_realNumber = n;
     }
 }
@@ -325,4 +325,17 @@ Number Number::operator >>(Number n)
     else if(isUInteger())
         return m_uintNumber >> n.m_uintNumber;
     return Number();
+}
+
+QDataStream &operator<<(QDataStream &to, const Number &num)
+{
+    to << num.m_intNumber << num.m_mode;
+    return to;
+}
+
+QDataStream &operator>>(QDataStream &from, Number &num)
+{
+    from >> num.m_intNumber;
+    from >> num.m_mode;
+    return from;
 }

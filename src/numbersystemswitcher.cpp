@@ -54,20 +54,59 @@ void NumberSystemSwitcher::updateFromAndTo(int i)
 {
     qint8 n = (qint8)comboBox->itemData(i).toInt();
 
-    if(n == 2) { from = 8; to = 10; }
-    else if(n == 8) { from = 10; to = 16; }
-    else if(n == 10) { from = 8; to = 16; }
-    else { from = 8; to = 10; }
-
-    lineEdit->setNumberMode(n);
-
-    updateLabel();
+    setFromTo(n);
 }
 
 void NumberSystemSwitcher::changeIndex(int n)
 {
-    if(n == 2) comboBox->setCurrentIndex(0);
-    else if(n == 8) comboBox->setCurrentIndex(1);
-    else if(n == 10) comboBox->setCurrentIndex(2);
-    else comboBox->setCurrentIndex(3);
+    setFromTo(n);
+}
+
+void NumberSystemSwitcher::setFromTo(int n)
+{
+    if(n == 2)
+    {
+        from = 8;
+        to = 10;
+        comboBox->setCurrentIndex(0);
+    }
+    else if(n == 8)
+    {
+        from = 10;
+        to = 16;
+        comboBox->setCurrentIndex(1);
+    }
+    else if(n == 10)
+    {
+        from = 8;
+        to = 16;
+        comboBox->setCurrentIndex(2);
+    }
+    else
+    {
+        from = 8;
+        to = 10;
+        comboBox->setCurrentIndex(3);
+    }
+
+    lineEdit->setNumberMode(n);
+    updateLabel();
+}
+
+QByteArray NumberSystemSwitcher::saveState() const
+{
+    QByteArray ba;
+    QDataStream stream(&ba, QIODevice::ReadWrite);
+
+    stream << comboBox->itemData(comboBox->currentIndex()).toInt();
+
+    return ba;
+}
+
+void NumberSystemSwitcher::restoreState(const QByteArray &ba)
+{
+    QDataStream stream(ba);
+    int n;
+    stream >> n;
+    setFromTo(n);
 }

@@ -33,6 +33,9 @@ private slots:
     void resultSlot();
 
 private:
+    Number calculate(Number n1, Number n2, const QString &op);
+    QString toOperator(const QString &str);
+
     Button *afButton[6];
     Button *andButton;
     Button *orButton;

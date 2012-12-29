@@ -158,16 +158,29 @@ void ProgrammingKeyboard::digitSlot()
     lineEdit->setNumber(text);
 }
 
-static Number calculate(Number n1, Number n2, const QString &op)
+Number ProgrammingKeyboard::calculate(Number n1, Number n2, const QString &op)
 {
-    if(op == QObject::tr("AND"))
+    if(op == tr("&"))
         return n1 & n2;
-    else if(op == QObject::tr("OR"))
+    else if(op == tr("|"))
         return n1 | n2;
-    else if(op == QObject::tr("XOR"))
+    else if(op == tr("^"))
         return n1 ^ n2;
+
     // else
     return n1 % n2; // mod
+}
+
+QString ProgrammingKeyboard::toOperator(const QString &str)
+{
+    if(str == tr("AND"))
+        return tr("&");
+    else if(str == tr("OR"))
+        return tr("|");
+    else if(str == tr("XOR"))
+        return tr("^");
+
+    return tr("%"); // mod
 }
 
 void ProgrammingKeyboard::twoOperandSlot()
@@ -189,9 +202,9 @@ void ProgrammingKeyboard::twoOperandSlot()
     else
         operatorStr = "";
 
-    operatorStr = operation;
+    operatorStr = toOperator(operation);
     sumSoFar = num;
-    lineEdit->setOperator(operation);
+    lineEdit->setOperator(operatorStr);
     lineEdit->setWait(true);
 }
 

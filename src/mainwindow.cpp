@@ -37,12 +37,18 @@ AboutDialog::AboutDialog(QWidget *parent)
 // ===========================================
 
 MainWindow::MainWindow(QWidget *parent)
-    : QWidget(parent), aboutDialog(0)
+    : QWidget(parent), aboutDialog(0), m_mode(0)
 {
+    QCoreApplication::setApplicationName(tr("ECalc"));
+    QCoreApplication::setOrganizationName(tr("VourheyApps"));
+    QCoreApplication::setOrganizationDomain(tr("https://github.com/Vourhey/ECalc"));
+
     m_init();
     initLayout();
     initActins();
     initMenu();
+
+    restoreState();
 }
 
 MainWindow::~MainWindow()
@@ -144,39 +150,113 @@ void MainWindow::initLayout()
     setLayout(mainLayout);
 }
 
-// ### TODO ###
-void MainWindow::changeMode()
+void MainWindow::closeEvent(QCloseEvent *)
 {
-    QAction *act = qobject_cast<QAction*>(sender());
+    QSettings settings;
 
-    bool b;
-    if(act == basicAct) b = false;
-    else b = true;
+    settings.beginGroup(tr("mainWindow"));
+    settings.setValue(tr("mode"), m_mode);
+    settings.setValue(tr("number"), m_lineEdit->saveState());
+    settings.setValue(tr("position"), pos());
+    settings.endGroup();
 
-    if(!m_numberSystemSwitcher)
-        m_numberSystemSwitcher = new NumberSystemSwitcher(m_lineEdit);
-    if(!m_binEditor)
-        m_binEditor = new BinEditor(m_lineEdit);
-    if(!m_programmingKeyboard)
-        m_programmingKeyboard = new ProgrammingKeyboard(m_lineEdit);
-
-    if(b)
+    if(m_mode == 1)
+        ;   // save advance settings
+    else if(m_mode == 2)
     {
+        settings.beginGroup(tr("programmingMode"));
+        settings.setValue(tr("numberSystemSwitcher"), m_numberSystemSwitcher->saveState());
+        settings.endGroup();
+    }
+}
+
+void MainWindow::restoreState()
+{
+    QSettings settings;
+
+    settings.beginGroup(tr("mainWindow"));
+    int mode = settings.value(tr("mode"), 0).toInt();
+    QPoint pos = settings.value(tr("position")).toPoint();
+    QByteArray ba = settings.value(tr("number"), QByteArray("\0\0\0\0\0\0\0\0u")).toByteArray();
+    settings.endGroup();
+
+    changeMode(mode);
+    move(pos);
+    m_lineEdit->restoreState(ba);
+
+    if(mode == 1)
+        ;   // ### todo
+    else if(mode == 2)
+    {
+        settings.beginGroup(tr("programmingMode"));
+        QByteArray b = settings.value(tr("numberSystemSwitcher"), QByteArray("\0\0\0\n")).toByteArray();
+        settings.endGroup();
+
+        m_numberSystemSwitcher->restoreState(b);
+    }
+}
+
+void MainWindow::changeMode(int mode)
+{
+    if(mode == -1)
+    {
+        QAction *act = qobject_cast<QAction*>(sender());
+        if(act == basicAct)
+            mode = 0;
+        else if(act == advanceAct)
+            mode = 1;
+        else
+            mode = 2;
+    }
+
+    if(m_mode == mode)
+        return; // уже выбран этот режим
+
+    m_mode = mode;
+
+    // возвращаем к Basic
+    if(m_numberSystemSwitcher)
+    {
+        mainLayout->removeWidget(m_numberSystemSwitcher);
+        m_numberSystemSwitcher->hide();
+    }
+    if(m_binEditor)
+    {
+        mainLayout->removeWidget(m_binEditor);
+        m_binEditor->hide();
+    }
+    if(m_programmingKeyboard)
+    {
+        horizontalLayout->removeWidget(m_programmingKeyboard);
+        m_programmingKeyboard->hide();
+    }
+    if(m_advanceKeyboard)
+    {
+        horizontalLayout->removeWidget(m_advanceKeyboard);
+        m_advanceKeyboard->hide();
+    }
+
+    switch(m_mode)
+    {
+    case 1:     // Advance
+        // ### TODO ###
+        break;
+    case 2:     // Programming
+        if(!m_numberSystemSwitcher)
+            m_numberSystemSwitcher = new NumberSystemSwitcher(m_lineEdit);
+        if(!m_binEditor)
+            m_binEditor = new BinEditor(m_lineEdit);
+        if(!m_programmingKeyboard)
+            m_programmingKeyboard = new ProgrammingKeyboard(m_lineEdit);
+
         mainLayout->insertWidget(1, m_numberSystemSwitcher);
         mainLayout->insertWidget(2, m_binEditor);
         horizontalLayout->insertWidget(1, m_programmingKeyboard);
+
         m_numberSystemSwitcher->show();
         m_binEditor->show();
         m_programmingKeyboard->show();
-    }
-    else
-    {
-        mainLayout->removeWidget(m_numberSystemSwitcher);
-        mainLayout->removeWidget(m_binEditor);
-        horizontalLayout->removeWidget(m_programmingKeyboard);
-        m_numberSystemSwitcher->hide();
-        m_binEditor->hide();
-        m_programmingKeyboard->hide();
+        break;
     }
 }
 

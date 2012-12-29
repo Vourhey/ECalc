@@ -13,6 +13,9 @@ class NumberSystemSwitcher : public QWidget
 public:
     explicit NumberSystemSwitcher(LineEdit *le, QWidget *parent = 0);
 
+    QByteArray saveState() const;
+    void restoreState(const QByteArray &ba);
+
 private slots:
     void setNumber(Number n);
     void updateFromAndTo(int i);
@@ -20,6 +23,7 @@ private slots:
     
 private:
     void updateLabel();
+    void setFromTo(int n);
 
     QComboBox *comboBox;
     QLabel *label;
