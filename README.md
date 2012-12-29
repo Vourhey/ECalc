@@ -5,15 +5,15 @@
 Для сборки выполните следующее:
 
 
-`qmake`      
-`make -f Makefile.Release`
+    qmake        
+    make -f Makefile.Release
 
 
 
 Для сборки переводов
 
 
-`lrelease ECalc.pro`
+    lrelease ECalc.pro
 
 
 Vadim Manaenko: <vadim.razorq@gmail.com>
