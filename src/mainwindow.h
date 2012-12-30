@@ -38,6 +38,7 @@ private slots:
     void aboutToShowReadMenu();
     void addToMemory();
     void insertIntoLineEdit();
+    void insertConst();
 
 private:
     void m_init();

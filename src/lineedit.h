@@ -4,11 +4,17 @@
 #include <QLineEdit>
 #include "number.h"
 
+class QMenu;
+class QAction;
+
 class LineEdit : public QLineEdit
 {
     Q_OBJECT
 public:
     explicit LineEdit(QWidget *parent = 0);
+
+    QAction *pasteAction() const;
+    QAction *copyAction() const;
 
     void setOperator(const QString &op);
     void resetOperator();
@@ -36,7 +42,11 @@ public slots:
     void setPoint();
     void setNumberMode(int m = 10);
 
+private slots:
+    void pasteSlot();
+
 protected:
+    void contextMenuEvent(QContextMenuEvent *);
     void paintEvent(QPaintEvent *);
 
 private:
@@ -44,6 +54,10 @@ private:
     Number displayed;
     bool m_waitOperand;
     int m_numberMode;
+
+    QMenu *contextMenu;
+    QAction *copyAct;
+    QAction *pasteAct;
 };
 
 #endif // LINEEDIT_H

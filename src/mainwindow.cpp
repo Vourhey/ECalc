@@ -111,12 +111,97 @@ void MainWindow::initMenu()
     QMenuBar *mb = menuBar();
 
     QMenu *fileMenu = mb->addMenu(tr("File"));
+    fileMenu->addAction(m_lineEdit->copyAction());
+    fileMenu->addAction(m_lineEdit->pasteAction());
+    fileMenu->addSeparator();
     fileMenu->addAction(exitAct);
 
     QMenu *modeMenu = mb->addMenu(tr("Mode"));
     modeMenu->addAction(basicAct);
 //    viewMenu->addAction(advanceAct);
     modeMenu->addAction(programmingAct);
+
+/*
+    // Constants =====================================================
+    // в процессе разработки
+    QMenu *constantMenu = mb->addMenu(tr("Constants"));
+    QMenu *universalMenu = constantMenu->addMenu(tr("Universal"));
+
+    QAction *act = new QAction(tr("c = 299 792 458 m/sec"), this);
+    act->setData(299792458);
+    connect(act, SIGNAL(triggered()), SLOT(insertConst()));
+    universalMenu->addAction(act);
+
+    act = new QAction(tr("G = 6.673E-11 m^3 kg^-1 s^-2"), this);
+    act->setData(6.67300E-11);
+    connect(act, SIGNAL(triggered()), SLOT(insertConst()));
+    universalMenu->addAction(act);
+
+    act = new QAction(tr("h = 6.626 069 572 9E-34 Дж * с"), this);
+    act->setData(6.6260695729E-34);
+    connect(act, SIGNAL(triggered()), SLOT(insertConst()));
+    universalMenu->addAction(act);
+
+    act = new QAction(tr("_h_ = 1.054 571 726 47E-34 Дж * с"), this);
+    act->setData(1.05457172647E-34);
+    connect(act, SIGNAL(triggered()), SLOT(insertConst()));
+    universalMenu->addAction(act);
+
+    QMenu *electroMagnetMenu = constantMenu->addMenu(tr("Electro-Magnetics"));
+    act = new QAction(tr("e = 1.602 176 46E-19 Кл"), this);
+    act->setData(1.60217646E-19);
+    connect(act, SIGNAL(triggered()), SLOT(insertConst()));
+    electroMagnetMenu->addAction(act);
+
+    QMenu *atomicMenu = constantMenu->addMenu(tr("Atomic && Nucklear"));
+    act = new QAction(tr("m_e = 9.109 389 754E-31 кг"), this);
+    act->setData(9.109389754E-31);
+    connect(act, SIGNAL(triggered()), SLOT(insertConst()));
+    atomicMenu->addAction(act);
+
+    act = new QAction(tr("m_p = 1.672 623 110E-27 кг"), this);
+    act->setData(1.672623110E-27);
+    connect(act, SIGNAL(triggered()), SLOT(insertConst()));
+    atomicMenu->addAction(act);
+
+    act = new QAction(tr("m_n = 1.674 928 610E-27 кг"), this);
+    act->setData(1.674928610E-27);
+    connect(act, SIGNAL(triggered()), SLOT(insertConst()));
+    atomicMenu->addAction(act);
+
+    QMenu *fiziksChemistryMenu = constantMenu->addMenu(tr("Fiziks & Chemistry"));
+    act = new QAction(tr("Na = 6.022 136 736E+23 Моль^-1"), this);
+    act->setData(6.022136736E+23);
+    connect(act, SIGNAL(triggered()), SLOT(insertConst()));
+    fiziksChemistryMenu->addAction(act);
+
+    act = new QAction(tr("F = 96 485. 30929 Кл*моль^-1"), this);
+    act->setData(96485.30929);
+    connect(act, SIGNAL(triggered()), SLOT(insertConst()));
+    fiziksChemistryMenu->addAction(act);
+
+    act = new QAction(tr("k = 1.380 685 12E-23 Дж * К^-1"), this);
+    act->setData(1.38068512E-23);
+    connect(act, SIGNAL(triggered()), SLOT(insertConst()));
+    fiziksChemistryMenu->addAction(act);
+
+    act = new QAction(tr("g_m = 9.80665 м * с^-2"), this);
+    act->setData(9.80665);
+    connect(act, SIGNAL(triggered()), SLOT(insertConst()));
+    fiziksChemistryMenu->addAction(act);
+
+    act = new QAction(tr("R = 8.314 51070 Дж * моль^-1 * K^-1"), this);
+    act->setData(8.31451070);
+    connect(act, SIGNAL(triggered()), SLOT(insertConst()));
+    fiziksChemistryMenu->addAction(act);
+
+    act = new QAction(tr("1эВ = 1.602 177 3349E-19 Дж"), this);
+    act->setData(1.6021773349E-19);
+    connect(act, SIGNAL(triggered()), SLOT(insertConst()));
+    fiziksChemistryMenu->addAction(act);
+
+    // ends constants =================================================
+*/
 
     QMenu *memoryMenu = mb->addMenu(tr("Memory"));
 
@@ -320,6 +405,14 @@ void MainWindow::insertIntoLineEdit()
 {
     QAction *act = qobject_cast<QAction*>(sender());
     m_lineEdit->setNumber(act->text(), act->data().toInt());
+}
+
+void MainWindow::insertConst()
+{
+    QAction *act = qobject_cast<QAction*>(sender());
+    Number n = act->data().toDouble();
+
+    m_lineEdit->setNumber(n);
 }
 
 void MainWindow::about()

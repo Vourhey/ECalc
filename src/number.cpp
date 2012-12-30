@@ -115,12 +115,12 @@ quint64 Number::toUInt64() const
 Number Number::toNumber(const QString &s, int b)
 {
     bool ok;
-    QVariant v(s);
-    if(v.canConvert(QVariant::ULongLong))
-        return s.toULongLong(&ok, b);
-    else if(v.canConvert(QVariant::Int))
-        return s.toInt(&ok, b);
-    return s.toDouble();    // возможны ошибки во всей функции
+
+    if(s.contains('.')/* || s.contains('E') || s.contains('e')*/) // double
+        return s.toDouble();    // не учитывается система счисления
+    if(s.contains('-')) // int
+        return s.toLongLong(&ok, b);
+    return s.toULongLong(&ok, b);
 }
 
 // Возвращает целую часть
@@ -147,11 +147,21 @@ void Number::setCurrent(qreal n)
         {
             m_intNumber = static_cast<qint64>(n);
             m_mode = qint8('i');
+            if(n != static_cast<qreal>(m_intNumber))
+            {
+                m_mode = qint8('d');
+                m_realNumber = n;
+            }
         }
         else    // unsigned
         {
             m_uintNumber = static_cast<quint64>(n);
             m_mode = qint8('u');
+            if(n != static_cast<qreal>(m_uintNumber))
+            {
+                m_mode = qint8('d');
+                m_realNumber = n;
+            }
         }
     }
     else

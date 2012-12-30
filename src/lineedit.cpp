@@ -1,11 +1,19 @@
-#include <QPainter>
+#include <QtGui>
 #include "lineedit.h"
 
 // модифицированное поле ввода
 LineEdit::LineEdit(QWidget *parent) :
-    QLineEdit(parent)
+    QLineEdit(parent), contextMenu(0), copyAct(0), pasteAct(0)
 {
     m_waitOperand = false;
+
+    copyAct = new QAction(tr("Copy"), this);
+    copyAct->setShortcut(QKeySequence::Copy);
+    connect(copyAct, SIGNAL(triggered()), SLOT(copy()));
+
+    pasteAct = new QAction(tr("Paste"), this);
+    pasteAct->setShortcut(QKeySequence::Paste);
+    connect(pasteAct, SIGNAL(triggered()), SLOT(pasteSlot()));
 
     setText(tr("0"));
     setAlignment(Qt::AlignRight);
@@ -17,6 +25,16 @@ LineEdit::LineEdit(QWidget *parent) :
     setFont(f);
 
     setNumberMode();
+}
+
+QAction *LineEdit::copyAction() const
+{
+    return copyAct;
+}
+
+QAction *LineEdit::pasteAction() const
+{
+    return pasteAct;
 }
 
 void LineEdit::setOperator(const QString &op)
@@ -34,6 +52,8 @@ void LineEdit::resetOperator()
 // все, что должно отображаться, должно выводиться через эти функции
 void LineEdit::setNumber(Number n)
 {
+    if(n == displayed)
+        return;
     setText(n.toString(m_numberMode).toUpper());
     displayed = n;
     emit numberChanged(n);
@@ -43,9 +63,8 @@ void LineEdit::setNumber(const QString &n, int m)
 {
     if(m != 0)
         setNumberMode(m);
-    displayed = Number::toNumber(n, m_numberMode);
-    setText(n);
-    emit numberChanged(displayed);
+    Number d = Number::toNumber(n, m_numberMode);
+    setNumber(d);
 }
 
 Number LineEdit::getNumber() const
@@ -101,6 +120,12 @@ void LineEdit::emitCalculateAll()
     emit calculateAll();
 }
 
+void LineEdit::pasteSlot()
+{
+    QClipboard *cl = qApp->clipboard();
+    setNumber(cl->text());
+}
+
 QByteArray LineEdit::saveState() const
 {
     QByteArray ba;
@@ -116,6 +141,18 @@ void LineEdit::restoreState(const QByteArray &ba)
     QDataStream stream (ba);
     stream >> num;
     setNumber(num);
+}
+
+void LineEdit::contextMenuEvent(QContextMenuEvent *e)
+{
+    if(!contextMenu)
+    {
+        contextMenu = new QMenu(this);
+        contextMenu->addAction(copyAct);
+        contextMenu->addAction(pasteAct);
+    }
+
+    contextMenu->exec(e->globalPos());
 }
 
 void LineEdit::paintEvent(QPaintEvent *e)
