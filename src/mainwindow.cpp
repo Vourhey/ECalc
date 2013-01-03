@@ -1,11 +1,14 @@
 #include <QtGui>
 #include "mainwindow.h"
-#include "lineedit.h"
+#include "calculator.h"
+
+/*#include "lineedit.h"
 #include "basickeyboard.h"
 #include "numbersystemswitcher.h"
 #include "bineditor.h"
 #include "advancekeyboard.h"
 #include "programmingkeyboard.h"
+*/
 
 AboutDialog::AboutDialog(QWidget *parent)
     : QDialog(parent)
@@ -37,24 +40,30 @@ AboutDialog::AboutDialog(QWidget *parent)
 // ===========================================
 
 MainWindow::MainWindow(QWidget *parent)
-    : QWidget(parent), aboutDialog(0), m_mode(0)
+    : QMainWindow(parent) //, aboutDialog(0), m_mode(0)
 {
     QCoreApplication::setApplicationName(tr("ECalc"));
     QCoreApplication::setOrganizationName(tr("VourheyApps"));
     QCoreApplication::setOrganizationDomain(tr("https://github.com/Vourhey/ECalc"));
 
-    m_init();
+    m_calc = new Calculator;
+    setCentralWidget(m_calc);
+
+    statusBar();
+
+/*    m_init();
     initLayout();
     initActins();
     initMenu();
 
-    restoreState();
+    restoreState(); */
 }
 
 MainWindow::~MainWindow()
 {
 }
 
+/*
 void MainWindow::m_init()
 {
     m_lineEdit = new LineEdit;
@@ -121,7 +130,7 @@ void MainWindow::initMenu()
 //    viewMenu->addAction(advanceAct);
     modeMenu->addAction(programmingAct);
 
-/*
+/ *
     // Constants =====================================================
     // в процессе разработки
     QMenu *constantMenu = mb->addMenu(tr("Constants"));
@@ -201,7 +210,7 @@ void MainWindow::initMenu()
     fiziksChemistryMenu->addAction(act);
 
     // ends constants =================================================
-*/
+* /
 
     QMenu *memoryMenu = mb->addMenu(tr("Memory"));
 
@@ -404,7 +413,8 @@ void MainWindow::addToMemory()
 void MainWindow::insertIntoLineEdit()
 {
     QAction *act = qobject_cast<QAction*>(sender());
-    m_lineEdit->setNumber(act->text(), act->data().toInt());
+    m_lineEdit->setNumberMode(act->data().toInt());
+    m_lineEdit->setNumber(act->text());
 }
 
 void MainWindow::insertConst()
@@ -424,3 +434,4 @@ void MainWindow::about()
 
     aboutDialog->exec();
 }
+*/

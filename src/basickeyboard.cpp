@@ -1,12 +1,127 @@
 #include <QtGui>
 #include "basickeyboard.h"
 
+class AddObj : public CalcObject
+{
+public:
+    AddObj()
+    {
+        m_unary = false;
+        m_op = QObject::tr("+");
+        m_priority = 3;
+    }
+
+    Number calc(Number n1, Number n2)
+    {
+        return n1 + n2;
+    }
+};
+
+class MinusObj : public CalcObject
+{
+public:
+    MinusObj()
+    {
+        m_unary = false;
+        m_op = QObject::tr("-");
+        m_priority = 3;
+    }
+
+    Number calc(Number n1, Number n2)
+    {
+        return n1 - n2;
+    }
+};
+
+class MultiplicationObj : public CalcObject
+{
+public:
+    MultiplicationObj()
+    {
+        m_unary = false;
+        m_op = QObject::tr("*");
+        m_priority = 2;
+    }
+
+    Number calc(Number n1, Number n2)
+    {
+        return n1 * n2;
+    }
+};
+
+class DivideObj : public CalcObject
+{
+public:
+    DivideObj()
+    {
+        m_unary = false;
+        m_op = QObject::tr("\u00F7");
+        m_priority = 2;
+    }
+
+    Number calc(Number n1, Number n2)
+    {
+        return n1 / n2;
+    }
+};
+
+class SquareObj : public CalcObject
+{
+public:
+    SquareObj()
+    {
+        m_unary = true;
+        m_op = QObject::tr("\u221A");
+        m_priority = 1;
+    }
+
+    Number calc(Number n1, Number n2)
+    {
+        Q_UNUSED(n2)
+        return qSqrt(n1.toDouble());
+    }
+};
+
+class PowerObj : public CalcObject
+{
+public:
+    PowerObj()
+    {
+        m_unary = true;
+        m_op = QObject::tr("x\u00B2");
+        m_priority = 1;
+    }
+
+    Number calc(Number n1, Number n2)
+    {
+        Q_UNUSED(n2)
+        return n1 * n1;
+    }
+};
+
+class MinusOneDegreeObj : public CalcObject
+{
+public:
+    MinusOneDegreeObj()
+    {
+        m_unary = true;
+        m_op = QObject::tr("1/x");
+        m_priority = 1;
+    }
+
+    Number calc(Number n1, Number n2)
+    {
+        Q_UNUSED(n2)
+        return 1 / n1;
+    }
+};
+
 BasicKeyboard::BasicKeyboard(LineEdit *le, QWidget *parent) :
-    QWidget(parent), lineEdit(le)
+    QWidget(parent), m_lineEdit(le)
 {
     initDefault();
 
-    mainLayout = new QGridLayout;
+    QGridLayout *mainLayout = new QGridLayout;
     mainLayout->setSpacing(0);
 
     mainLayout->addWidget(clearAllButton, 0, 0, 1, 2);
@@ -23,7 +138,7 @@ BasicKeyboard::BasicKeyboard(LineEdit *le, QWidget *parent) :
 
     mainLayout->addWidget(numberButton[0], 4, 0);
     mainLayout->addWidget(pointButton, 4, 1);
-    mainLayout->addWidget(percentButton, 4, 2);
+//    mainLayout->addWidget(percentButton, 4, 2);
 
     mainLayout->addWidget(divideButton, 1, 3);
     mainLayout->addWidget(multiplicationButton, 2, 3);
@@ -36,24 +151,22 @@ BasicKeyboard::BasicKeyboard(LineEdit *le, QWidget *parent) :
 
     setLayout(mainLayout);
 
-    connect(lineEdit, SIGNAL(numberModeChanged(int)), SLOT(enableDigit(int)));
-    enableDigit();
+//    connect(lineEdit, SIGNAL(numberModeChanged(int)), SLOT(enableDigit(int)));
+//    enableDigit();
 }
+
 
 // выполняет начальную инициализацию
 void BasicKeyboard::initDefault()
 {
-    sumSoFar    = 0.0;
-    factorSoFar = 0.0;
-
     backspaceButton = Button::createButton(tr("\u2190"), this, SLOT(backspaceSlot()),
                                            QKeySequence(Qt::Key_Backspace), tr("Backspace"));
-    clearButton = Button::createButton(tr("Clear"), this, SLOT(clearSlot()),
+    clearButton = Button::createButton(tr("Clear"), m_lineEdit, SLOT(clearSlot()),
                                        QKeySequence(Qt::Key_Escape), tr("Clear display"));
-    clearAllButton = Button::createButton(tr("Clear All"), this, SLOT(clearAllSlot()));
+    clearAllButton = Button::createButton(tr("Clear All"), m_lineEdit, SLOT(clearAll()));
 
-    percentButton = Button::createButton(tr("%"), this, SLOT(unaryOperationSlot()),
-                                         QKeySequence(Qt::Key_Percent), tr("Percent"));
+//    percentButton = Button::createButton(tr("%"), this, SLOT(unaryOperationSlot()),
+//                                         QKeySequence(Qt::Key_Percent), tr("Percent"));
 
     // цифры
     for(int i = 0; i < 10; ++i)
@@ -62,34 +175,68 @@ void BasicKeyboard::initDefault()
                                      QKeySequence(QString::number(i)));
     }
 
-    pointButton = Button::createButton(tr(","), lineEdit, SLOT(setPoint()),
+    pointButton = Button::createButton(tr(","), this, SLOT(pointSlot()),
                                        QKeySequence(","));
-    divideButton = Button::createButton(tr("\u00F7"), this, SLOT(twoOperandSlot()),
+    divideButton = Button::createButton(tr("\u00F7"), this, SLOT(operationSlot()),
                                         QKeySequence("/"), tr("Division"));
-    multiplicationButton = Button::createButton(tr("x"), this, SLOT(twoOperandSlot()),
+    divideButton->setCalcObject(new DivideObj);
+    multiplicationButton = Button::createButton(tr("x"), this, SLOT(operationSlot()),
                                                 QKeySequence("*"), tr("Multiplication"));
-    minusButton = Button::createButton(tr("-"), this, SLOT(twoOperandSlot()),
+    multiplicationButton->setCalcObject(new MultiplicationObj);
+    minusButton = Button::createButton(tr("-"), this, SLOT(operationSlot()),
                                        QKeySequence(Qt::Key_Minus), tr("Subtract"));
-    plusButton = Button::createButton(tr("+"), this, SLOT(twoOperandSlot()),
+    minusButton->setCalcObject(new MinusObj);
+    plusButton = Button::createButton(tr("+"), this, SLOT(operationSlot()),
                                       QKeySequence(Qt::Key_Plus), tr("Add"));
-    sqrtButton = Button::createButton(tr("\u221A"), this, SLOT(unaryOperationSlot()),
+    plusButton->setCalcObject(new AddObj);
+    sqrtButton = Button::createButton(tr("\u221A"), this, SLOT(operationSlot()),
                                       QKeySequence(tr("Ctrl+R")), tr("Root"));
-    powerButton = Button::createButton(tr("x\u00B2"), this, SLOT(unaryOperationSlot()),
+    sqrtButton->setCalcObject(new SquareObj);
+    powerButton = Button::createButton(tr("x\u00B2"), this, SLOT(operationSlot()),
                                        QKeySequence(tr("Ctrl+2")), tr("Square"));
-    minusOneDegreeButton = Button::createButton(tr("1/x"), this, SLOT(unaryOperationSlot()),
+    powerButton->setCalcObject(new PowerObj);
+    minusOneDegreeButton = Button::createButton(tr("1/x"), this, SLOT(operationSlot()),
                                                 QKeySequence(tr("Ctrl+I")), tr("Invert"));
-    resultButton = Button::createButton(tr("="), this, SLOT(resultSlot()),
+    minusOneDegreeButton->setCalcObject(new MinusOneDegreeObj);
+    resultButton = Button::createButton(tr("="), m_lineEdit, SLOT(calculate()),
                                         QKeySequence(Qt::Key_Return));
 }
 
 void BasicKeyboard::backspaceSlot()
 {
-    QString t = lineEdit->text();
-    t.chop(1);
-    if(t.isEmpty()) t = tr("0");
-    lineEdit->setNumber(t);
+    m_lineEdit->backspace();
 }
 
+void BasicKeyboard::digitButtonSlot()
+{
+    Button *btn = qobject_cast<Button*>(sender());
+
+    m_lineEdit->addChar(btn->text().at(0));
+//    if(lineEdit->waitOperand())
+//    {
+//        lineEdit->setNumber(Number());
+//        lineEdit->setWait(false);
+//    }
+//    QString text = lineEdit->text();
+//    if(text == "0") text.chop(1);
+//    text.append(btn->text());
+//    lineEdit->setNumber(text);
+}
+
+void BasicKeyboard::pointSlot()
+{
+    QString t = m_lineEdit->text();
+    if(!t.contains(','))
+        m_lineEdit->addChar(',');
+}
+
+void BasicKeyboard::operationSlot()
+{
+    Button *btn = qobject_cast<Button*>(sender());
+    m_lineEdit->addOperator(btn->calcObject());
+}
+
+/*
 void BasicKeyboard::clearSlot()
 {
     lineEdit->setNumber(Number());
@@ -127,22 +274,6 @@ void BasicKeyboard::enableDigit(int b)
         for(int i=2; i<10; ++i)
             numberButton[i]->setEnabled(false);
     }
-}
-
-void BasicKeyboard::digitButtonSlot()
-{
-    if(lineEdit->waitOperand())
-    {
-        lineEdit->setNumber(Number());
-        lineEdit->setWait(false);
-    }
-
-    Button *btn = qobject_cast<Button*>(sender());
-
-    QString text = lineEdit->text();
-    if(text == "0") text.chop(1);
-    text.append(btn->text());
-    lineEdit->setNumber(text);
 }
 
 // вспомогательная функция для подсчета
@@ -193,11 +324,11 @@ void BasicKeyboard::twoOperandSlot()
     {
         if(lineEdit->waitOperand()) // ещё один костыль
             additiveStr = "";
-     /*   if(!multipliStr.isEmpty())
+     / *   if(!multipliStr.isEmpty())
         {
             number = calculate(factorSoFar, number, multipliStr);
             lineEdit->setNumber(number);
-        } */
+        } * /
         multipliStr = operation;
         factorSoFar = number;
     }
@@ -258,3 +389,4 @@ void BasicKeyboard::resultSlot()
     lineEdit->resetOperator();
     lineEdit->setWait(true);
 }
+*/

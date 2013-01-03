@@ -11,7 +11,7 @@ Button::Button(const QString &text, QWidget *parent) :
 QSize Button::sizeHint() const
 {
     QSize size = QToolButton::sizeHint();
-    size.rheight() += 10;
+    size.rheight() += 20;
     size.rwidth() = qMax(size.height(), size.width());
     return size;
 }
@@ -27,4 +27,14 @@ Button *Button::createButton(const QString &text, const QObject *obj,
     if(!key.isEmpty()) btn->setShortcut(key);
     if(!tooltip.isEmpty()) btn->setToolTip(tooltip);
     return btn;
+}
+
+void Button::setCalcObject(CalcObject *co)
+{
+    m_co = co;
+}
+
+CalcObject *Button::calcObject() const
+{
+    return m_co;
 }

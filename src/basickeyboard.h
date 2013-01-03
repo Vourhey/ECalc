@@ -5,34 +5,33 @@
 #include "button.h"
 #include "lineedit.h"
 
-class QGridLayout;
-
+// клавиатуры занимаются только настройкой и отображением кнопочек
 class BasicKeyboard : public QWidget
 {
     Q_OBJECT
 public:
     explicit BasicKeyboard(LineEdit *le, QWidget *parent = 0);
 
+
 private slots:
     void backspaceSlot();
-    void clearSlot();
-    void clearAllSlot();
     void digitButtonSlot();
-    void twoOperandSlot(); // для + - * /
-    void unaryOperationSlot(); // для унарных операций
-    void resultSlot();
-    void enableDigit(int = 10);
+    void pointSlot();
+    void operationSlot();
+//    void twoOperandSlot(); // для + - * /
+//    void unaryOperationSlot(); // для унарных операций
+//    void resultSlot();
+//    void enableDigit(int = 10);
 
 private:
     void initDefault();
 
-    // widgets
-    LineEdit *lineEdit;
+    LineEdit *m_lineEdit;
 
     Button *backspaceButton;
     Button *clearButton;
     Button *clearAllButton;
-    Button *percentButton;
+//    Button *percentButton;
     Button *numberButton[10];
     Button *pointButton;
     Button *divideButton;
@@ -43,14 +42,6 @@ private:
     Button *powerButton;
     Button *minusOneDegreeButton;
     Button *resultButton;
-
-    QGridLayout *mainLayout;
-
-    // for calc
-    Number sumSoFar;
-    Number factorSoFar;
-    QString additiveStr;
-    QString multipliStr;
 };
 
 #endif // BASICKEYBOARD_H

@@ -1,14 +1,16 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <QMainWindow>
 #include <QDialog>
-#include <QList>
 
+class QLabel;
+
+/*
 class QAction;
 class QMenuBar;
 class QVBoxLayout;
 class QHBoxLayout;
-class QLabel;
 
 class LineEdit;
 class BasicKeyboard;
@@ -17,9 +19,11 @@ class ProgrammingKeyboard;
 class BinEditor;
 class NumberSystemSwitcher;
 class AboutDialog;
+*/
 
-// It's not child of QMainWindow!
-class MainWindow : public QWidget
+class Calculator;
+
+class MainWindow : public QMainWindow
 {
     Q_OBJECT
     
@@ -27,6 +31,10 @@ public:
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+private:
+    Calculator *m_calc;
+
+    /*
 protected:
     void closeEvent(QCloseEvent *);
 
@@ -70,11 +78,11 @@ private:
     QList<QAction*> m_memory;
     AboutDialog *aboutDialog;
 
-    /* 0 - Basic
+    / * 0 - Basic
      * 1 - Advance
      * 2 - Programming
-     */
-    int m_mode;
+     * /
+    int m_mode; */
 };
 
 class AboutDialog : public QDialog
