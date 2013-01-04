@@ -11,9 +11,9 @@ class CalcObject
 public:
     CalcObject();
     bool isUnary() const;
-    int priority() const; // приоритет операции. Имеет смысл только для бинарных операций
+    int priority() const; // приоритет операции
     const QString &getOperator() const;
-    virtual Number calc(Number n1, Number n2) = 0;
+    virtual Number calc(Number n1, Number n2 = Number()) = 0;
 
 protected:
     bool m_unary;

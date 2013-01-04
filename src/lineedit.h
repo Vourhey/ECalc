@@ -23,8 +23,8 @@ public slots:
 
 //    ~LineEdit();
 
-//    QAction *pasteAction() const;
-//    QAction *copyAction() const;
+    QAction *pasteAction() const;
+    QAction *copyAction() const;
 
 //    void setOperator(const QString &op);
 //    void resetOperator();
@@ -52,24 +52,27 @@ public slots:
 //    void setPoint();
 //    void setNumberMode(int m = 10);
 
-//private slots:
-//    void pasteSlot();
+private slots:
+    void pasteSlot();
 
-//protected:
-//    void contextMenuEvent(QContextMenuEvent *);
-//    void paintEvent(QPaintEvent *);
+protected:
+    void contextMenuEvent(QContextMenuEvent *);
+    void paintEvent(QPaintEvent *);
 
 private:
-//    QString m_operator;
+    void p_calc(CalcObject *co);
+    Number oneOperation(CalcObject *co);
+
+    QString m_operator;
     Number displayed;
     QStack<Number> m_numbers;
     QStack<CalcObject*> postfix;
     bool m_waitOperand;
 //    int m_numberMode;
 
-//    QMenu *contextMenu;
-//    QAction *copyAct;
-//    QAction *pasteAct;
+    QMenu *contextMenu;
+    QAction *copyAct;
+    QAction *pasteAct;
 
 //    History *m_history;
 };

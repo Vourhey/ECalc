@@ -1,0 +1,7 @@
+ECalc
+ECalc.pro.user
+moc_*
+*.o
+Makefile*
+ecalc_*.qm
+*.autosave

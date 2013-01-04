@@ -2,24 +2,37 @@
 #include "lineedit.h"
 #include "history.h"
 
+QDebug operator<<(QDebug dbg, CalcObject *c)
+{
+    dbg.nospace() << c->getOperator();
+
+    return dbg.space();
+}
+
+QDebug operator<<(QDebug dbg, Number n)
+{
+    dbg.nospace() << n.toString();
+
+    return dbg.space();
+}
+
 // модифицированное поле ввода
 LineEdit::LineEdit(QWidget *parent) :
-    QLineEdit(parent) //, contextMenu(0), copyAct(0), pasteAct(0)
+    QLineEdit(parent), contextMenu(0)
 {
     m_waitOperand = false;
 //    m_history = new History(this, tr("log"));
 
-//    copyAct = new QAction(tr("Copy"), this);
-//    copyAct->setShortcut(QKeySequence::Copy);
-//    connect(copyAct, SIGNAL(triggered()), SLOT(copy()));
+    copyAct = new QAction(tr("Copy"), this);
+    copyAct->setShortcut(QKeySequence::Copy);
+    connect(copyAct, SIGNAL(triggered()), SLOT(copy()));
 
-//    pasteAct = new QAction(tr("Paste"), this);
-//    pasteAct->setShortcut(QKeySequence::Paste);
-//    connect(pasteAct, SIGNAL(triggered()), SLOT(pasteSlot()));
+    pasteAct = new QAction(tr("Paste"), this);
+    pasteAct->setShortcut(QKeySequence::Paste);
+    connect(pasteAct, SIGNAL(triggered()), SLOT(pasteSlot()));
 
     setText(tr("0"));
     setAlignment(Qt::AlignRight);
-    //setMaxLength(15);
     setReadOnly(true);
 
     QFont f = font();
@@ -46,26 +59,95 @@ void LineEdit::addChar(QChar c)
 
 void LineEdit::addOperator(CalcObject *co)
 {
+    if(co->getOperator().at(0) == '(')
+    {
+        postfix.push(co);
+        return;
+    }
+
+    if(co->isUnary())
+    {
+        Number n = Number(text());
+        n = co->calc(n);
+        setText(n.toString());
+        return;
+    }
+
     m_numbers.push(Number(text()));
-    postfix.push(co);
+
+    p_calc(co);
+
     m_waitOperand = true;
+    setText(m_numbers.top().toString());
+    repaint();
+
+    qDebug() << m_numbers;
+    qDebug() << postfix;
+}
+
+// Основано на обратной польской нотации
+// ### TODO ###
+// переработать алгоритм
+void LineEdit::p_calc(CalcObject *co)
+{
+    Number n;
+    if(co->getOperator() == tr(")"))
+    {
+        if(postfix.isEmpty())
+            return;
+
+        CalcObject *c1 = postfix.pop();
+        while(c1->getOperator().at(0) != '(')
+        {
+            n = oneOperation(c1);
+            m_numbers.push(n);
+            c1 = postfix.pop();
+        }
+        return;
+    }
+
+    if(postfix.isEmpty())
+    {
+        postfix.push(co);
+        m_operator = co->getOperator();
+        return;
+    }
+
+    while(co->priority() >= postfix.top()->priority())
+    {
+        // костыль
+        if(postfix.top()->getOperator().at(0) == '(')
+            break;
+
+        CalcObject *c1 = postfix.pop();
+
+        n = oneOperation(c1);
+        m_numbers.push(n);
+
+        if(postfix.isEmpty())   // ещё один
+            break;
+    }
+    postfix.push(co);
+    m_operator = co->getOperator();
+}
+
+Number LineEdit::oneOperation(CalcObject *co)
+{
+    Number n2 = m_numbers.pop();
+    Number n1 = m_numbers.pop();
+    return co->calc(n1, n2);
 }
 
 void LineEdit::calculate()
 {
     m_numbers.push(Number(text()));
-    if(postfix.isEmpty())
-       return;
-    CalcObject *co = postfix.pop();
     Number n;
 
-    if(co->isUnary())
-        n = co->calc(m_numbers.pop());
-    else
+    while(!postfix.isEmpty())
     {
-        Number n2 = m_numbers.pop();
-        Number n1 = m_numbers.pop();
-        n = co->calc(n1, n2);
+        CalcObject *c1 = postfix.pop();
+        n = oneOperation(c1);
+        m_numbers.push(n);
     }
 
     clearAll();
@@ -85,6 +167,7 @@ void LineEdit::clearAll()
     postfix.clear();
     setText(tr("0"));
     m_waitOperand = false;
+    m_operator = "";
 }
 
 void LineEdit::insertNumber(Number n)
@@ -98,15 +181,15 @@ void LineEdit::insertNumber(Number n)
 //    m_history->saveToFile();
 //}
 
-//QAction *LineEdit::copyAction() const
-//{
-//    return copyAct;
-//}
+QAction *LineEdit::copyAction() const
+{
+    return copyAct;
+}
 
-//QAction *LineEdit::pasteAction() const
-//{
-//    return pasteAct;
-//}
+QAction *LineEdit::pasteAction() const
+{
+    return pasteAct;
+}
 
 //void LineEdit::setOperator(const QString &op)
 //{
@@ -195,11 +278,11 @@ void LineEdit::insertNumber(Number n)
 //    emit calculateAll();
 //}
 
-//void LineEdit::pasteSlot()
-//{
-//    QClipboard *cl = qApp->clipboard();
-//    setNumber(cl->text());
-//}
+void LineEdit::pasteSlot()
+{
+    QClipboard *cl = qApp->clipboard();
+    insertNumber(cl->text());
+}
 
 //QByteArray LineEdit::saveState() const
 //{
@@ -218,31 +301,31 @@ void LineEdit::insertNumber(Number n)
 //    setNumber(num);
 //}
 
-//void LineEdit::contextMenuEvent(QContextMenuEvent *e)
-//{
-//    if(!contextMenu)
-//    {
-//        contextMenu = new QMenu(this);
-//        contextMenu->addAction(copyAct);
-//        contextMenu->addAction(pasteAct);
-//    }
+void LineEdit::contextMenuEvent(QContextMenuEvent *e)
+{
+    if(!contextMenu)
+    {
+        contextMenu = new QMenu(this);
+        contextMenu->addAction(copyAct);
+        contextMenu->addAction(pasteAct);
+    }
 
-//    contextMenu->exec(e->globalPos());
-//}
+    contextMenu->exec(e->globalPos());
+}
 
-//void LineEdit::paintEvent(QPaintEvent *e)
-//{
-//    QLineEdit::paintEvent(e);
+void LineEdit::paintEvent(QPaintEvent *e)
+{
+    QLineEdit::paintEvent(e);
 
-//    QPainter p(this);
+    QPainter p(this);
 
-//    // координаты получены экспериментально
+    // координаты получены экспериментально
 
-//    // ### TODO ###
-//    if(!m_operator.isEmpty())
-//    {
-//        p.setFont(QFont("Arial", 12));
-//        p.drawRect(5, height()-15, 11, 11);
-//        p.drawText(5, height()-15, 12, 12, Qt::AlignCenter, m_operator);
-//    }
-//}
+    // ### TODO ###
+    if(!m_operator.isEmpty())
+    {
+        p.setFont(QFont("Arial", 12));
+        p.drawRect(5, height()-15, 11, 11);
+        p.drawText(5, height()-15, 12, 12, Qt::AlignCenter, m_operator);
+    }
+}

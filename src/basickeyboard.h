@@ -31,7 +31,7 @@ private:
     Button *backspaceButton;
     Button *clearButton;
     Button *clearAllButton;
-//    Button *percentButton;
+    Button *minusUnaryButton;
     Button *numberButton[10];
     Button *pointButton;
     Button *divideButton;
@@ -42,6 +42,8 @@ private:
     Button *powerButton;
     Button *minusOneDegreeButton;
     Button *resultButton;
+    Button *leftBraceButton;
+    Button *rightBraceButton;
 };
 
 #endif // BASICKEYBOARD_H
