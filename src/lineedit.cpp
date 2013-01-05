@@ -20,7 +20,6 @@ QDebug operator<<(QDebug dbg, Number n)
 LineEdit::LineEdit(QWidget *parent) :
     QLineEdit(parent), contextMenu(0)
 {
-    m_waitOperand = false;
 //    m_history = new History(this, tr("log"));
 
     copyAct = new QAction(tr("Copy"), this);
@@ -39,7 +38,9 @@ LineEdit::LineEdit(QWidget *parent) :
     f.setPointSize(f.pointSize() + 8);
     setFont(f);
 
-    addChar('0');
+    m_waitOperand = false;
+    isDisplayed = false;
+    setText(tr("0"));
 
 //    setNumberMode();
 }
@@ -48,32 +49,64 @@ void LineEdit::addChar(QChar c)
 {
     if(m_waitOperand)
     {
-        setText(tr(""));
+        setText(tr("0"));
         m_waitOperand = false;
     }
 
     QString t = text();
     if(t == tr("0")) t = "";
     setText(t + c);
+    isDisplayed = false;
 }
 
+void LineEdit::addPoint()
+{
+    QString t = text();
+    if(!t.contains('.'))
+        setText(t.append('.'));
+}
+
+// ### TODO ###
+// переработать алгоритм
 void LineEdit::addOperator(CalcObject *co)
 {
     if(co->getOperator().at(0) == '(')
     {
         postfix.push(co);
+        isDisplayed = false;
         return;
     }
 
     if(co->isUnary())
     {
-        Number n = Number(text());
+        Number n;
+        if(isDisplayed)
+            n = m_numbers.pop();
+        else
+            n = Number(text());
         n = co->calc(n);
+        m_numbers.push(n);
         setText(n.toString());
+        isDisplayed = true;
+
+        qDebug() << m_numbers;
+        qDebug() << postfix;
+
         return;
     }
 
-    m_numbers.push(Number(text()));
+    if(m_waitOperand)   // пользователь просто меняет знак операции
+    {
+        if(!postfix.isEmpty())
+            postfix.pop();
+        postfix.push(co);
+        m_operator = co->getOperator();
+        repaint();
+        return;
+    }
+
+    if(!isDisplayed)
+        m_numbers.push(Number(text()));
 
     p_calc(co);
 
@@ -86,16 +119,11 @@ void LineEdit::addOperator(CalcObject *co)
 }
 
 // Основано на обратной польской нотации
-// ### TODO ###
-// переработать алгоритм
 void LineEdit::p_calc(CalcObject *co)
 {
     Number n;
-    if(co->getOperator() == tr(")"))
+    if(!postfix.isEmpty() && co->getOperator() == tr(")"))
     {
-        if(postfix.isEmpty())
-            return;
-
         CalcObject *c1 = postfix.pop();
         while(c1->getOperator().at(0) != '(')
         {
@@ -103,32 +131,20 @@ void LineEdit::p_calc(CalcObject *co)
             m_numbers.push(n);
             c1 = postfix.pop();
         }
+        isDisplayed = true;
         return;
     }
 
-    if(postfix.isEmpty())
+    while(!postfix.isEmpty() && co->priority() >= postfix.top()->priority())
     {
-        postfix.push(co);
-        m_operator = co->getOperator();
-        return;
-    }
-
-    while(co->priority() >= postfix.top()->priority())
-    {
-        // костыль
-        if(postfix.top()->getOperator().at(0) == '(')
-            break;
-
         CalcObject *c1 = postfix.pop();
 
         n = oneOperation(c1);
         m_numbers.push(n);
-
-        if(postfix.isEmpty())   // ещё один
-            break;
     }
     postfix.push(co);
     m_operator = co->getOperator();
+    isDisplayed = false;
 }
 
 Number LineEdit::oneOperation(CalcObject *co)
@@ -140,7 +156,10 @@ Number LineEdit::oneOperation(CalcObject *co)
 
 void LineEdit::calculate()
 {
-    m_numbers.push(Number(text()));
+    // не могу объяснить, зачем условие.. так работает
+    if(!isDisplayed)
+        m_numbers.push(Number(text()));
+
     Number n;
 
     while(!postfix.isEmpty())
@@ -153,6 +172,7 @@ void LineEdit::calculate()
     clearAll();
     m_numbers.push(n);
     setText(n.toString());
+    isDisplayed = true;
 }
 
 // очищаем только экран
@@ -166,7 +186,8 @@ void LineEdit::clearAll()
     m_numbers.clear();
     postfix.clear();
     setText(tr("0"));
-    m_waitOperand = false;
+    m_waitOperand = true;
+    isDisplayed = false;
     m_operator = "";
 }
 
@@ -265,17 +286,6 @@ QAction *LineEdit::pasteAction() const
 //bool LineEdit::waitOperand() const
 //{
 //    return m_waitOperand;
-//}
-
-//void LineEdit::setPoint()
-//{
-//    if(!text().contains('.'))
-//        setText(text().append('.'));
-//}
-
-//void LineEdit::emitCalculateAll()
-//{
-//    emit calculateAll();
 //}
 
 void LineEdit::pasteSlot()

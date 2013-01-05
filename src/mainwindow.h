@@ -6,6 +6,7 @@
 
 class QLabel;
 
+class AboutDialog;
 /*
 class QAction;
 class QMenuBar;
@@ -18,7 +19,6 @@ class AdvanceKeyboard;
 class ProgrammingKeyboard;
 class BinEditor;
 class NumberSystemSwitcher;
-class AboutDialog;
 */
 
 class Calculator;
@@ -31,15 +31,31 @@ public:
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+private slots:
+    void about();
+
 private:
+    void initActins();
+    void initMenu();
+
     Calculator *m_calc;
+
+    QAction *exitAct;
+    QAction *aboutAct;
+    QAction *aboutQtAct;
+    QAction *basicAct;
+    QAction *advanceAct;
+    QAction *programmingAct;
+//    QAction *clearMemoryAct;
+//    QAction *addToMemoryAct;
+
+    AboutDialog *aboutDialog;
 
     /*
 protected:
     void closeEvent(QCloseEvent *);
 
 private slots:
-    void about();
     void changeMode(int = -1);
     void clearMemory();
     void aboutToShowWriteMenu();
@@ -50,11 +66,8 @@ private slots:
 
 private:
     void m_init();
-    void initMenu();
-    void initActins();
     void initLayout();
     void restoreState();
-    QMenuBar *menuBar();
 
     LineEdit *m_lineEdit;
     BasicKeyboard *m_basicKeyboard;
@@ -63,26 +76,10 @@ private:
     BinEditor *m_binEditor;
     NumberSystemSwitcher *m_numberSystemSwitcher;
 
-    QAction *exitAct;
-    QAction *aboutAct;
-    QAction *aboutQtAct;
-    QAction *basicAct;
-    QAction *advanceAct;
-    QAction *programmingAct;
-    QAction *clearMemoryAct;
-    QAction *addToMemoryAct;
-
     QVBoxLayout *mainLayout;
     QHBoxLayout *horizontalLayout;
 
-    QList<QAction*> m_memory;
-    AboutDialog *aboutDialog;
-
-    / * 0 - Basic
-     * 1 - Advance
-     * 2 - Programming
-     * /
-    int m_mode; */
+    QList<QAction*> m_memory; */
 };
 
 class AboutDialog : public QDialog

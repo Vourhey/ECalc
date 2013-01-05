@@ -40,7 +40,7 @@ AboutDialog::AboutDialog(QWidget *parent)
 // ===========================================
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent) //, aboutDialog(0), m_mode(0)
+    : QMainWindow(parent), aboutDialog(0)
 {
     QCoreApplication::setApplicationName(tr("ECalc"));
     QCoreApplication::setOrganizationName(tr("VourheyApps"));
@@ -49,35 +49,18 @@ MainWindow::MainWindow(QWidget *parent)
     m_calc = new Calculator;
     setCentralWidget(m_calc);
 
-    statusBar();
+    statusBar();    // создаем статус бар
 
-/*    m_init();
-    initLayout();
     initActins();
     initMenu();
+/*    m_init()
+    initLayout();
 
     restoreState(); */
 }
 
 MainWindow::~MainWindow()
 {
-}
-
-/*
-void MainWindow::m_init()
-{
-    m_lineEdit = new LineEdit;
-    m_basicKeyboard = new BasicKeyboard(m_lineEdit);
-
-    m_advanceKeyboard = 0;
-    m_programmingKeyboard = 0;
-    m_binEditor = 0;
-    m_numberSystemSwitcher = 0;
-}
-
-QMenuBar *MainWindow::menuBar()
-{
-    return qobject_cast<QMenuBar*>(mainLayout->menuBar());
 }
 
 void MainWindow::initActins()
@@ -94,13 +77,16 @@ void MainWindow::initActins()
     connect(aboutQtAct, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
 
     basicAct = new QAction(tr("Basic"), this);
-    connect(basicAct, SIGNAL(triggered()), SLOT(changeMode()));
+    basicAct->setData(1);
+    connect(basicAct, SIGNAL(triggered()), m_calc, SLOT(changeMode()));
 
     advanceAct = new QAction(tr("Advance"), this);
-    connect(advanceAct, SIGNAL(triggered()), SLOT(changeMode()));
+    advanceAct->setData(2);
+    connect(advanceAct, SIGNAL(triggered()), m_calc, SLOT(changeMode()));
 
     programmingAct = new QAction(tr("Programming"), this);
-    connect(programmingAct, SIGNAL(triggered()), SLOT(changeMode()));
+    programmingAct->setData(3);
+    connect(programmingAct, SIGNAL(triggered()), m_calc, SLOT(changeMode()));
 
     QActionGroup *ag = new QActionGroup(this);
     ag->addAction(basicAct);
@@ -108,11 +94,11 @@ void MainWindow::initActins()
     ag->addAction(programmingAct);
     basicAct->setChecked(true);
 
-    clearMemoryAct = new QAction(tr("Clear memory"), this);
+ /*   clearMemoryAct = new QAction(tr("Clear memory"), this);
     connect(clearMemoryAct, SIGNAL(triggered()), SLOT(clearMemory()));
 
     addToMemoryAct = new QAction(tr("New item"), this);
-    connect(addToMemoryAct, SIGNAL(triggered()), SLOT(addToMemory()));
+    connect(addToMemoryAct, SIGNAL(triggered()), SLOT(addToMemory())); */
 }
 
 void MainWindow::initMenu()
@@ -120,17 +106,17 @@ void MainWindow::initMenu()
     QMenuBar *mb = menuBar();
 
     QMenu *fileMenu = mb->addMenu(tr("File"));
-    fileMenu->addAction(m_lineEdit->copyAction());
-    fileMenu->addAction(m_lineEdit->pasteAction());
+    fileMenu->addAction(m_calc->lineEdit()->copyAction());
+    fileMenu->addAction(m_calc->lineEdit()->pasteAction());
     fileMenu->addSeparator();
     fileMenu->addAction(exitAct);
 
     QMenu *modeMenu = mb->addMenu(tr("Mode"));
     modeMenu->addAction(basicAct);
-//    viewMenu->addAction(advanceAct);
+    modeMenu->addAction(advanceAct);
     modeMenu->addAction(programmingAct);
 
-/ *
+/*
     // Constants =====================================================
     // в процессе разработки
     QMenu *constantMenu = mb->addMenu(tr("Constants"));
@@ -210,20 +196,40 @@ void MainWindow::initMenu()
     fiziksChemistryMenu->addAction(act);
 
     // ends constants =================================================
-* /
+*/
 
-    QMenu *memoryMenu = mb->addMenu(tr("Memory"));
+/*    QMenu *memoryMenu = mb->addMenu(tr("Memory"));
 
     QMenu *writeToMenu = memoryMenu->addMenu(tr("Write to"));
     connect(writeToMenu, SIGNAL(aboutToShow()), SLOT(aboutToShowWriteMenu()));
     QMenu *readFromMenu = memoryMenu->addMenu(tr("Read from"));
     connect(readFromMenu, SIGNAL(aboutToShow()), SLOT(aboutToShowReadMenu()));
 
-    memoryMenu->addAction(clearMemoryAct);
+    memoryMenu->addAction(clearMemoryAct); */
 
     QMenu *helpMenu = mb->addMenu(tr("Help"));
     helpMenu->addAction(aboutAct);
     helpMenu->addAction(aboutQtAct);
+}
+
+void MainWindow::about()
+{
+    if(!aboutDialog)
+        aboutDialog = new AboutDialog;
+
+    aboutDialog->exec();
+}
+
+/*
+void MainWindow::m_init()
+{
+    m_lineEdit = new LineEdit;
+    m_basicKeyboard = new BasicKeyboard(m_lineEdit);
+
+    m_advanceKeyboard = 0;
+    m_programmingKeyboard = 0;
+    m_binEditor = 0;
+    m_numberSystemSwitcher = 0;
 }
 
 void MainWindow::initLayout()
@@ -423,15 +429,5 @@ void MainWindow::insertConst()
     Number n = act->data().toDouble();
 
     m_lineEdit->setNumber(n);
-}
-
-void MainWindow::about()
-{
-    if(!aboutDialog)
-    {
-        aboutDialog = new AboutDialog;
-    }
-
-    aboutDialog->exec();
 }
 */

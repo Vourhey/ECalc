@@ -12,7 +12,10 @@ class LineEdit : public QLineEdit
 public:
     explicit LineEdit(QWidget *parent = 0);
 
-    void addChar(QChar c);
+    QAction *pasteAction() const;
+    QAction *copyAction() const;
+
+    void addChar(QChar c);    
     void addOperator(CalcObject *co);
     void insertNumber(Number n);
 
@@ -20,11 +23,9 @@ public slots:
     void calculate();   // =
     void clearSlot();
     void clearAll();
+    void addPoint();
 
 //    ~LineEdit();
-
-    QAction *pasteAction() const;
-    QAction *copyAction() const;
 
 //    void setOperator(const QString &op);
 //    void resetOperator();
@@ -35,21 +36,14 @@ public slots:
 
 //    int numberMode() const;
 
-//    void setWait(bool b);
-//    bool waitOperand() const;
-
-//    void emitCalculateAll();
-
 //    QByteArray saveState() const;
 //    void restoreState(const QByteArray &ba);
 
 //signals:
 //    void numberChanged(Number n);
 //    void numberModeChanged(int base);
-//    void calculateAll();    // emited when result button press
 
 //public slots:
-//    void setPoint();
 //    void setNumberMode(int m = 10);
 
 private slots:
@@ -68,6 +62,7 @@ private:
     QStack<Number> m_numbers;
     QStack<CalcObject*> postfix;
     bool m_waitOperand;
+    bool isDisplayed;   // если отображаемое число хранится на вершине стека
 //    int m_numberMode;
 
     QMenu *contextMenu;

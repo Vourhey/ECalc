@@ -140,7 +140,7 @@ public:
     {
         m_unary = false;
         m_op = QObject::tr("(");
-        m_priority = 1;
+        m_priority = 5;
     }
 
     // не нужно
@@ -158,7 +158,7 @@ public:
     {
         m_unary = false;
         m_op = QObject::tr(")");
-        m_priority = 1;
+        m_priority = 5;
     }
 
     // не нужно
@@ -230,8 +230,8 @@ void BasicKeyboard::initDefault()
                                      QKeySequence(QString::number(i)));
     }
 
-    pointButton = Button::createButton(tr(","), this, SLOT(pointSlot()),
-                                       QKeySequence(","));
+    pointButton = Button::createButton(tr("."), m_lineEdit, SLOT(addPoint()),
+                                       QKeySequence("."));
     divideButton = Button::createButton(tr("\u00F7"), this, SLOT(operationSlot()),
                                         QKeySequence("/"), tr("Division"));
     divideButton->setStatusTip(tr("Division")); // todo для каждого
@@ -276,13 +276,6 @@ void BasicKeyboard::digitButtonSlot()
     m_lineEdit->addChar(btn->text().at(0));
 }
 
-void BasicKeyboard::pointSlot()
-{
-    QString t = m_lineEdit->text();
-    if(!t.contains(','))
-        m_lineEdit->addChar(',');
-}
-
 void BasicKeyboard::operationSlot()
 {
     Button *btn = qobject_cast<Button*>(sender());
@@ -290,22 +283,6 @@ void BasicKeyboard::operationSlot()
 }
 
 /*
-void BasicKeyboard::clearSlot()
-{
-    lineEdit->setNumber(Number());
-    lineEdit->setWait(false);
-}
-
-void BasicKeyboard::clearAllSlot()
-{
-    lineEdit->setNumber(Number());
-    lineEdit->resetOperator();
-    lineEdit->setWait(false);
-    sumSoFar = 0.0;
-    additiveStr = "";
-    multipliStr = "";
-}
-
 void BasicKeyboard::enableDigit(int b)
 {
     if(b == 10)

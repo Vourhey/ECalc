@@ -1,6 +1,6 @@
 #include <QVBoxLayout>
+#include <QAction>
 #include "calculator.h"
-#include "lineedit.h"
 #include "basickeyboard.h"
 
 Calculator::Calculator(QWidget *parent) :
@@ -20,7 +20,18 @@ LineEdit *Calculator::lineEdit() const
     return m_lineEdit;
 }
 
-void Calculator::changeMode(int mode)
+void Calculator::changeMode()
 {
-    Q_UNUSED(mode)
+    QAction *act = qobject_cast<QAction*>(sender());
+    int mode = act->data().toInt();
+
+    switch(mode)
+    {
+    case 1: // Basic
+        break;
+    case 2: // Advance
+        break;
+    case 3: // Programming
+        break;
+    }
 }

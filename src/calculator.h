@@ -2,8 +2,8 @@
 #define CALCULATOR_H
 
 #include <QWidget>
+#include "lineedit.h"
 
-class LineEdit;
 class BasicKeyboard;
 
 class Calculator : public QWidget
@@ -13,7 +13,9 @@ public:
     explicit Calculator(QWidget *parent = 0);
 
     LineEdit *lineEdit() const;
-    void changeMode(int mode);
+
+public slots:
+    void changeMode();
 
 private:
     LineEdit *m_lineEdit;

@@ -16,7 +16,6 @@ public:
 private slots:
     void backspaceSlot();
     void digitButtonSlot();
-    void pointSlot();
     void operationSlot();
 //    void twoOperandSlot(); // для + - * /
 //    void unaryOperationSlot(); // для унарных операций
