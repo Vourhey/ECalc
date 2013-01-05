@@ -221,17 +221,6 @@ void MainWindow::about()
 }
 
 /*
-void MainWindow::m_init()
-{
-    m_lineEdit = new LineEdit;
-    m_basicKeyboard = new BasicKeyboard(m_lineEdit);
-
-    m_advanceKeyboard = 0;
-    m_programmingKeyboard = 0;
-    m_binEditor = 0;
-    m_numberSystemSwitcher = 0;
-}
-
 void MainWindow::initLayout()
 {
     mainLayout = new QVBoxLayout;

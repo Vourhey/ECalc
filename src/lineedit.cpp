@@ -193,8 +193,10 @@ void LineEdit::clearAll()
 
 void LineEdit::insertNumber(Number n)
 {
+    m_numbers.push(n);
     setText(n.toString());
     m_waitOperand = false;
+    isDisplayed = true;
 }
 
 //LineEdit::~LineEdit()

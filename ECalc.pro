@@ -17,11 +17,11 @@ SOURCES += src/main.cpp\
         src/mainwindow.cpp \
     src/button.cpp \
     src/lineedit.cpp \
-#    src/bineditor.cpp \
-#    src/numbersystemswitcher.cpp \
+    src/bineditor.cpp \
+    src/numbersystemswitcher.cpp \
     src/basickeyboard.cpp \
-#    src/advancekeyboard.cpp \
-#    src/programmingkeyboard.cpp \
+    src/advancekeyboard.cpp \
+    src/programmingkeyboard.cpp \
     src/number.cpp \
 #    src/history.cpp \
     src/calculator.cpp \
@@ -30,11 +30,11 @@ SOURCES += src/main.cpp\
 HEADERS  += src/mainwindow.h \
     src/button.h \
     src/lineedit.h \
-#    src/bineditor.h \
-#    src/numbersystemswitcher.h \
+    src/bineditor.h \
+    src/numbersystemswitcher.h \
     src/basickeyboard.h \
-#    src/advancekeyboard.h \
-#    src/programmingkeyboard.h \
+    src/advancekeyboard.h \
+    src/programmingkeyboard.h \
     src/number.h \
 #    src/history.h \
     src/calculator.h \

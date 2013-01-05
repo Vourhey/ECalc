@@ -4,6 +4,7 @@
 #include "programmingkeyboard.h"
 #include "button.h"
 #include "lineedit.h"
+#include "calcobject.h"
 
 InsertCharDialog::InsertCharDialog(QWidget *parent)
     : QDialog (parent)
@@ -48,6 +49,275 @@ void InsertCharDialog::enableButton(const QString &str)
 
 // ======================================================================
 
+class ANDObj : public CalcObject
+{
+public:
+    ANDObj()
+    {
+        m_unary = false;
+        m_op = QObject::tr("&");
+        m_priority = 4;
+    }
+
+    Number calc(Number n1, Number n2)
+    {
+        return n1 & n2;
+    }
+};
+
+class ORObj : public CalcObject
+{
+public:
+    ORObj()
+    {
+        m_unary = false;
+        m_op = QObject::tr("|");
+        m_priority = 4;
+    }
+
+    Number calc(Number n1, Number n2)
+    {
+        return n1 | n2;
+    }
+};
+
+class XORObj : public CalcObject
+{
+public:
+    XORObj()
+    {
+        m_unary = false;
+        m_op = QObject::tr("^");
+        m_priority = 4;
+    }
+
+    Number calc(Number n1, Number n2)
+    {
+        return n1 ^ n2;
+    }
+};
+
+class NOTObj : public CalcObject
+{
+public:
+    NOTObj()
+    {
+        m_unary = true;
+        m_op = QObject::tr("~");
+        m_priority = 1;
+    }
+
+    Number calc(Number n1, Number n2)
+    {
+        Q_UNUSED(n2)
+        return ~n1;
+    }
+};
+
+class LogObj : public CalcObject
+{
+public:
+    LogObj()
+    {
+        m_unary = true;
+        m_op = QObject::tr("log");
+        m_priority = 1;
+    }
+
+    Number calc(Number n1, Number n2)
+    {
+        Q_UNUSED(n2)
+        if(n1 <= 0)
+            n1 = 1;    // позже нужно будет отдельно сообщать об ошибке
+        return log10(n1.toDouble());
+    }
+};
+
+class LnObj : public CalcObject
+{
+public:
+    LnObj()
+    {
+        m_unary = true;
+        m_op = QObject::tr("ln");
+        m_priority = 1;
+    }
+
+    Number calc(Number n1, Number n2)
+    {
+        Q_UNUSED(n2)
+        if(n1 <= 0)
+            n1 = 1;
+        return log(n1.toDouble());
+    }
+};
+
+class ModObj : public CalcObject
+{
+public:
+    ModObj()
+    {
+        m_unary = false;
+        m_op = QObject::tr("%");
+        m_priority = 2;
+    }
+
+    Number calc(Number n1, Number n2)
+    {
+        return n1 % n2;
+    }
+};
+
+class IntObj : public CalcObject
+{
+public:
+    IntObj()
+    {
+        m_unary = true;
+        m_op = QObject::tr("int");
+        m_priority = 1;
+    }
+
+    Number calc(Number n1, Number n2)
+    {
+        Q_UNUSED(n2)
+        return n1.integer();
+    }
+};
+
+class FracObj : public CalcObject
+{
+public:
+    FracObj()
+    {
+        m_unary = true;
+        m_op = QObject::tr("frac");
+        m_priority = 1;
+    }
+
+    Number calc(Number n1, Number n2)
+    {
+        Q_UNUSED(n2)
+        return n1.fraction();
+    }
+};
+
+class FactorialObj : public CalcObject
+{
+public:
+    FactorialObj()
+    {
+        m_unary = true;
+        m_op = QObject::tr("!");
+        m_priority = 1;
+    }
+
+    Number calc(Number n1, Number n2)
+    {
+        Q_UNUSED(n2)
+        if(n1.isUInteger())
+        {
+            quint64 t = 1;
+            quint64 n = n1.toUInt64();
+            while(n > 1)
+            {
+                t *= n;
+                --n;
+            }
+            return Number(t);
+        }
+        // else ### error message ###
+        // ещё выводить сообщение об ошибке, если происходит переполнение
+        return Number(0);
+    }
+};
+
+class AbsObj : public CalcObject
+{
+public:
+    AbsObj()
+    {
+        m_unary = true;
+        m_op = QObject::tr("|x|");
+        m_priority = 1;
+    }
+
+    Number calc(Number n1, Number n2)
+    {
+        Q_UNUSED(n2)
+        return n1 > 0 ? n1 : -n1;
+    }
+};
+
+class OnesObj : public CalcObject
+{
+public:
+    OnesObj()
+    {
+        m_unary = true;
+        m_op = QObject::tr("ones");
+        m_priority = 1;
+    }
+
+    Number calc(Number n1, Number n2)
+    {
+        Q_UNUSED(n2)
+        // простое инвентирование
+        return ~n1;
+    }
+};
+
+class TwosObj : public CalcObject
+{
+public:
+    TwosObj()
+    {
+        m_unary = true;
+        m_op = QObject::tr("twos");
+        m_priority = 1;
+    }
+
+    Number calc(Number n1, Number n2)
+    {
+        Q_UNUSED(n2)
+        return (~n1 + 1);
+    }
+};
+
+class ShlObj : public CalcObject
+{
+public:
+    ShlObj()
+    {
+        m_unary = true;
+        m_op = QObject::tr("shl");
+        m_priority = 1;
+    }
+
+    Number calc(Number n1, Number n2)
+    {
+        Q_UNUSED(n2)
+        return (n1 << 1);
+    }
+};
+
+class ShrObj : public CalcObject
+{
+public:
+    ShrObj()
+    {
+        m_unary = true;
+        m_op = QObject::tr("shr");
+        m_priority = 1;
+    }
+
+    Number calc(Number n1, Number n2)
+    {
+        Q_UNUSED(n2)
+        return (n1 >> 1);
+    }
+};
+
 ProgrammingKeyboard::ProgrammingKeyboard(LineEdit *le, QWidget *parent) :
     QWidget(parent), lineEdit(le), dialog(0)
 {
@@ -61,42 +331,53 @@ ProgrammingKeyboard::ProgrammingKeyboard(LineEdit *le, QWidget *parent) :
     afButton[4] = Button::createButton(tr("E"), this, SLOT(digitSlot()));
     afButton[5] = Button::createButton(tr("F"), this, SLOT(digitSlot()));
 
-    andButton = Button::createButton(tr("AND"), this, SLOT(twoOperandSlot()),
+    andButton = Button::createButton(tr("AND"), this, SLOT(operationSlot()),
                                      QKeySequence(), tr("Logical And"));
-    orButton = Button::createButton(tr("OR"), this, SLOT(twoOperandSlot()),
+    andButton->setCalcObject(new ANDObj);
+    orButton = Button::createButton(tr("OR"), this, SLOT(operationSlot()),
                                     QKeySequence(), tr("Logical Or"));
-    xorButton = Button::createButton(tr("XOR"), this, SLOT(twoOperandSlot()),
+    orButton->setCalcObject(new ORObj);
+    xorButton = Button::createButton(tr("XOR"), this, SLOT(operationSlot()),
                                      QKeySequence(), tr("Logical Xor"));
-    notButton = Button::createButton(tr("NOT"), this, SLOT(notSlot()),
+    xorButton->setCalcObject(new XORObj);
+    notButton = Button::createButton(tr("NOT"), this, SLOT(operationSlot()),
                                      QKeySequence(), tr("Logical Not"));
-    modButton = Button::createButton(tr("mod"), this, SLOT(twoOperandSlot()),
+    notButton->setCalcObject(new NOTObj);
+    modButton = Button::createButton(tr("mod"), this, SLOT(operationSlot()),
                                      QKeySequence(tr("|")), tr("Modulo"));
-
-    logButton = Button::createButton(tr("log"), this, SLOT(logSlot()),
+    modButton->setCalcObject(new ModObj);
+    logButton = Button::createButton(tr("log"), this, SLOT(operationSlot()),
                                      QKeySequence(), tr("Logarihm to base 10"));
-    lnButton = Button::createButton(tr("ln"), this, SLOT(logSlot()),
+    logButton->setCalcObject(new LogObj);
+    lnButton = Button::createButton(tr("ln"), this, SLOT(operationSlot()),
                                     QKeySequence(), tr("Logarihm to base e"));
-
-    intButton = Button::createButton(tr("int"), this, SLOT(intFracSlot()),
+    lnButton->setCalcObject(new LnObj);
+    intButton = Button::createButton(tr("int"), this, SLOT(operationSlot()),
                                      QKeySequence(), tr("Integer"));
-    fracButton = Button::createButton(tr("frac"), this, SLOT(intFracSlot()),
+    intButton->setCalcObject(new IntObj);
+    fracButton = Button::createButton(tr("frac"), this, SLOT(operationSlot()),
                                       QKeySequence(), tr("Fraction"));
-
-    factorialButton = Button::createButton(tr("x!"), this, SLOT(factorialSlot()),
+    fracButton->setCalcObject(new FracObj);
+    factorialButton = Button::createButton(tr("x!"), this, SLOT(operationSlot()),
                                            QKeySequence(tr("!")), tr("Factorial"));
-    absButton = Button::createButton(tr("|x|"), this, SLOT(absSlot()),
+    factorialButton->setCalcObject(new FactorialObj);
+    absButton = Button::createButton(tr("|x|"), this, SLOT(operationSlot()),
                                      QKeySequence(), tr("Absolute value"));
+    absButton->setCalcObject(new AbsObj);
     charButton = Button::createButton(tr("a\u0301"), this, SLOT(insertCodeOfChar()),
                                       QKeySequence(), tr("Insert character code"));
-    onesButton = Button::createButton(tr("ones"), this, SLOT(onesSlot()),
+    onesButton = Button::createButton(tr("ones"), this, SLOT(operationSlot()),
                                       QKeySequence(), tr("One's complement"));
-    twosButton = Button::createButton(tr("twos"), this, SLOT(twosSlot()),
+    onesButton->setCalcObject(new OnesObj);
+    twosButton = Button::createButton(tr("twos"), this, SLOT(operationSlot()),
                                       QKeySequence(), tr("Two's complement"));
-
-    shlButton = Button::createButton(tr("<<"), this, SLOT(shlSlot()),
+    twosButton->setCalcObject(new TwosObj);
+    shlButton = Button::createButton(tr("<<"), this, SLOT(operationSlot()),
                                      QKeySequence(), tr("Shift left"));
-    shrButton = Button::createButton(tr(">>"), this, SLOT(shrSlot()),
+    shlButton->setCalcObject(new ShlObj);
+    shrButton = Button::createButton(tr(">>"), this, SLOT(operationSlot()),
                                      QKeySequence(), tr("Shift right"));
+    shrButton->setCalcObject(new ShrObj);
 
     gridLayout->addWidget(afButton[3], 0, 0);
     gridLayout->addWidget(afButton[2], 1, 0);
@@ -123,9 +404,8 @@ ProgrammingKeyboard::ProgrammingKeyboard(LineEdit *le, QWidget *parent) :
 
     setLayout(gridLayout);
 
-    connect(lineEdit, SIGNAL(calculateAll()), SLOT(resultSlot()));
-    connect(lineEdit, SIGNAL(numberModeChanged(int)), SLOT(enableAF(int)));
-    enableAF(lineEdit->numberMode());
+ //   connect(lineEdit, SIGNAL(numberModeChanged(int)), SLOT(enableAF(int)));
+    enableAF(10);   // ### TODO ###
 }
 
 void ProgrammingKeyboard::enableAF(int b)
@@ -144,120 +424,14 @@ void ProgrammingKeyboard::enableAF(int b)
 
 void ProgrammingKeyboard::digitSlot()
 {
-    if(lineEdit->waitOperand())
-    {
-        lineEdit->setNumber(Number());
-        lineEdit->setWait(false);
-    }
-
     Button *btn = qobject_cast<Button*>(sender());
-
-    QString text = lineEdit->text();
-    if(text == "0") text.chop(1);
-    text.append(btn->text());
-    lineEdit->setNumber(text);
+    lineEdit->addChar(btn->text().at(0));
 }
 
-Number ProgrammingKeyboard::calculate(Number n1, Number n2, const QString &op)
-{
-    if(op == tr("&"))
-        return n1 & n2;
-    else if(op == tr("|"))
-        return n1 | n2;
-    else if(op == tr("^"))
-        return n1 ^ n2;
-
-    // else
-    return n1 % n2; // mod
-}
-
-QString ProgrammingKeyboard::toOperator(const QString &str)
-{
-    if(str == tr("AND"))
-        return tr("&");
-    else if(str == tr("OR"))
-        return tr("|");
-    else if(str == tr("XOR"))
-        return tr("^");
-
-    return tr("%"); // mod
-}
-
-void ProgrammingKeyboard::twoOperandSlot()
-{
-    lineEdit->emitCalculateAll();
-
-    Number num = lineEdit->getNumber();
-    Button *btn = qobject_cast<Button*>(sender());
-    QString operation = btn->text();
-
-    if(!lineEdit->waitOperand())
-    {
-        if(!operatorStr.isEmpty())
-        {
-            num = calculate(sumSoFar, num, operatorStr);
-            lineEdit->setNumber(num);
-        }
-    }
-    else
-        operatorStr = "";
-
-    operatorStr = toOperator(operation);
-    sumSoFar = num;
-    lineEdit->setOperator(operatorStr);
-    lineEdit->setWait(true);
-}
-
-void ProgrammingKeyboard::resultSlot()
-{
-    Number num = lineEdit->getNumber();
-    if(!operatorStr.isEmpty())
-    {
-        num = calculate(sumSoFar, num, operatorStr);
-        lineEdit->setNumber(num);
-        sumSoFar = 0;
-        operatorStr = "";
-    }
-}
-
-void ProgrammingKeyboard::notSlot()
-{
-    Number n = lineEdit->getNumber();
-    lineEdit->setNumber(~n);
-//    else
-//        ;   // соообщить об ошибке.
-            // придумать механизм отправки ошибок
-}
-
-void ProgrammingKeyboard::intFracSlot()
+void ProgrammingKeyboard::operationSlot()
 {
     Button *btn = qobject_cast<Button*>(sender());
-    QString t = btn->text();
-
-    Number num = lineEdit->getNumber();
-
-    if(t == tr("int"))  // выделяем целую часть
-        lineEdit->setNumber(num.integer());
-    else    // дробную
-        lineEdit->setNumber(num.fraction());
-}
-
-void ProgrammingKeyboard::factorialSlot()
-{
-    Number num = lineEdit->getNumber();
-    if(num.isUInteger())
-    {
-        quint64 t = 1;
-        quint64 n = num.toUInt64();
-        while(n > 1)
-        {
-            t *= n;
-            --n;
-        }
-        lineEdit->setNumber(Number(t));
-    }
-    // else ### error message ###
-    // ещё выводить сообщение об ошибке, если происходит переполнение
+    lineEdit->addOperator(btn->calcObject());
 }
 
 void ProgrammingKeyboard::insertCodeOfChar()
@@ -268,62 +442,5 @@ void ProgrammingKeyboard::insertCodeOfChar()
     }
 
     dialog->exec();
-    lineEdit->setNumber(dialog->getCharCode());
-}
-
-void ProgrammingKeyboard::logSlot()
-{
-    Button *btn = qobject_cast<Button*>(sender());
-    QString t = btn->text();
-
-    Number num = lineEdit->getNumber();
-    if(num <= 0)
-        num = 1;    // позже нужно будет отдельно сообщать об ошибке
-
-    if(t == tr("log"))  // десятичный log_10
-    {
-        num = log10(num.toDouble());
-        lineEdit->setNumber(num);
-    }
-    else    // натуральный log_e
-    {
-        num = log(num.toDouble());
-        lineEdit->setNumber(num);
-    }
-}
-
-void ProgrammingKeyboard::absSlot()
-{
-    Number num = lineEdit->getNumber();
-    if(num < 0) num = - num;
-    lineEdit->setNumber(num);
-}
-
-// следующие функции работают только с quint64 (беззнаковым целым)
-void ProgrammingKeyboard::onesSlot()
-{
-    // простое инвентирование
-    Number num = lineEdit->getNumber();
-    lineEdit->setNumber(~num);
-}
-
-void ProgrammingKeyboard::twosSlot()
-{
-    // инвертировать и прибавить 1
-    Number num = lineEdit->getNumber();
-    lineEdit->setNumber(~num + 1);
-}
-
-void ProgrammingKeyboard::shlSlot()
-{
-    Number num = lineEdit->getNumber();
-    num = num << 1;
-    lineEdit->setNumber(num);
-}
-
-void ProgrammingKeyboard::shrSlot()
-{
-    Number num = lineEdit->getNumber();
-    num = num >> 1;
-    lineEdit->setNumber(num);
+    lineEdit->insertNumber(dialog->getCharCode());
 }

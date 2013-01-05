@@ -5,6 +5,13 @@
 #include "lineedit.h"
 
 class BasicKeyboard;
+class NumberSystemSwitcher;
+class ProgrammingKeyboard;
+class BinEditor;
+class AdvanceKeyboard;
+
+class QVBoxLayout;
+class QHBoxLayout;
 
 class Calculator : public QWidget
 {
@@ -15,11 +22,20 @@ public:
     LineEdit *lineEdit() const;
 
 public slots:
-    void changeMode();
+    void changeMode(int m = -1);
 
 private:
     LineEdit *m_lineEdit;
     BasicKeyboard *m_basicKeyboard;
+    ProgrammingKeyboard *m_programmingKeyboard;
+    BinEditor *m_binEditor;
+    NumberSystemSwitcher *m_numberSystemSwitcher;
+    AdvanceKeyboard *m_advanceKeyboard;
+
+    QVBoxLayout *mainLayout;
+    QHBoxLayout *horizontalLayout;
+
+    int m_mode; // текущий режим
 };
 
 #endif // CALCULATOR_H

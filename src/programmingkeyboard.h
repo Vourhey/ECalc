@@ -18,24 +18,11 @@ public:
 
 private slots:
     void digitSlot();
-    void twoOperandSlot();
-    void notSlot();
-    void logSlot();
-    void intFracSlot();
-    void factorialSlot();
-    void absSlot();
+    void operationSlot();
     void insertCodeOfChar();
-    void onesSlot();
-    void twosSlot();
-    void shlSlot();
-    void shrSlot();
     void enableAF(int b);
-    void resultSlot();
 
 private:
-    Number calculate(Number n1, Number n2, const QString &op);
-    QString toOperator(const QString &str);
-
     Button *afButton[6];
     Button *andButton;
     Button *orButton;
@@ -53,9 +40,6 @@ private:
     Button *twosButton;
     Button *shlButton; // <<
     Button *shrButton; // >>
-
-    QString operatorStr;
-    Number  sumSoFar;
 
     LineEdit *lineEdit;
     InsertCharDialog *dialog;
