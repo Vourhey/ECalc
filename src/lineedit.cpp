@@ -39,8 +39,9 @@ LineEdit::LineEdit(QWidget *parent) :
     setFont(f);
 
     m_waitOperand = false;
-    isDisplayed = false;
-    setText(tr("0"));
+
+    addNumber(0);
+    setText(getNumber().toString());
 
 //    setNumberMode();
 }
@@ -55,8 +56,10 @@ void LineEdit::addChar(QChar c)
 
     QString t = text();
     if(t == tr("0")) t = "";
-    setText(t + c);
+    addNumber(t.append(c));
     isDisplayed = false;
+    // появятся проблемы, когда будет несколько систем счисления
+    emit numberChanged(getNumber());
 }
 
 void LineEdit::addPoint()
@@ -64,6 +67,18 @@ void LineEdit::addPoint()
     QString t = text();
     if(!t.contains('.'))
         setText(t.append('.'));
+}
+
+void LineEdit::addNumber(Number n)
+{
+    if(m_numbers.size() > 1)    // чтобы не было лишних элементов
+        m_numbers.pop();
+    if(m_waitOperand && !m_numbers.isEmpty())
+        m_numbers.pop();
+    m_numbers.push(n);
+    isDisplayed = true;
+    setText(n.toString());
+    qDebug() << m_numbers;
 }
 
 // ### TODO ###
@@ -85,9 +100,7 @@ void LineEdit::addOperator(CalcObject *co)
         else
             n = Number(text());
         n = co->calc(n);
-        m_numbers.push(n);
-        setText(n.toString());
-        isDisplayed = true;
+        addNumber(n);
 
         qDebug() << m_numbers;
         qDebug() << postfix;
@@ -112,6 +125,7 @@ void LineEdit::addOperator(CalcObject *co)
 
     m_waitOperand = true;
     setText(m_numbers.top().toString());
+    emit numberChanged(m_numbers.top());
     repaint();
 
     qDebug() << m_numbers;
@@ -170,9 +184,8 @@ void LineEdit::calculate()
     }
 
     clearAll();
-    m_numbers.push(n);
-    setText(n.toString());
-    isDisplayed = true;
+    addNumber(n);
+    emit numberChanged(m_numbers.top());
 }
 
 // очищаем только экран
@@ -193,10 +206,14 @@ void LineEdit::clearAll()
 
 void LineEdit::insertNumber(Number n)
 {
-    m_numbers.push(n);
-    setText(n.toString());
+    addNumber(n);
     m_waitOperand = false;
-    isDisplayed = true;
+    emit numberChanged(m_numbers.top());
+}
+
+Number LineEdit::getNumber() const
+{
+    return m_numbers.top();
 }
 
 //LineEdit::~LineEdit()
@@ -238,19 +255,6 @@ QAction *LineEdit::pasteAction() const
 //    displayed = n;
 //    emit numberChanged(n);
 ////    m_history->addNumber(text());
-//}
-///*
-//void LineEdit::setNumber(const QString &n, int m)
-//{
-//    if(m != 0)
-//        setNumberMode(m);
-//    Number d = Number::toNumber(n, m_numberMode);
-//    setNumber(d);
-//}*/
-
-//Number LineEdit::getNumber() const
-//{
-//    return displayed;
 //}
 
 ///*

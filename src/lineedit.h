@@ -19,6 +19,8 @@ public:
     void addOperator(CalcObject *co);
     void insertNumber(Number n);
 
+    Number getNumber() const;
+
 public slots:
     void calculate();   // =
     void clearSlot();
@@ -31,16 +33,13 @@ public slots:
 //    void resetOperator();
 
 //    void setNumber(Number n);
-////   void setNumber(const QString& n, int m = 0);
-//    Number getNumber() const;
-
 //    int numberMode() const;
 
 //    QByteArray saveState() const;
 //    void restoreState(const QByteArray &ba);
 
-//signals:
-//    void numberChanged(Number n);
+signals:
+    void numberChanged(Number n);
 //    void numberModeChanged(int base);
 
 //public slots:
@@ -56,6 +55,7 @@ protected:
 private:
     void p_calc(CalcObject *co);
     Number oneOperation(CalcObject *co);
+    void addNumber(Number n);
 
     QString m_operator;
     Number displayed;

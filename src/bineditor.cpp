@@ -57,8 +57,8 @@ BinEditor::BinEditor(LineEdit *le, QWidget *parent) :
 
     setLayout(gridLayout);
 
- //   connect(lineEdit, SIGNAL(numberChanged(Number)), SLOT(setNumber(Number)));
-//    setNumber(lineEdit->getNumber());
+    connect(lineEdit, SIGNAL(numberChanged(Number)), SLOT(setNumber(Number)));
+    setNumber(lineEdit->getNumber());
 }
 
 void BinEditor::labelClickSlot(int d, const QString &text)
@@ -77,7 +77,7 @@ void BinEditor::labelClickSlot(int d, const QString &text)
         m_number = m_n & temp;
     }
 
-    //lineEdit->setNumber(m_number);
+    lineEdit->insertNumber(m_number);
 }
 
 void BinEditor::setNumber(Number n)
