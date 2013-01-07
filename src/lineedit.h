@@ -26,6 +26,7 @@ public slots:
     void clearSlot();
     void clearAll();
     void addPoint();
+    void backspace();
 
 //    ~LineEdit();
 
@@ -54,15 +55,13 @@ protected:
 
 private:
     void p_calc(CalcObject *co);
-    Number oneOperation(CalcObject *co);
-    void addNumber(Number n);
+    Number binaryOperation(CalcObject *co);
 
     QString m_operator;
     Number displayed;
     QStack<Number> m_numbers;
     QStack<CalcObject*> postfix;
     bool m_waitOperand;
-    bool isDisplayed;   // если отображаемое число хранится на вершине стека
 //    int m_numberMode;
 
     QMenu *contextMenu;

@@ -2,6 +2,7 @@
 #include "lineedit.h"
 #include "history.h"
 
+#ifndef QT_NO_DEBUG
 QDebug operator<<(QDebug dbg, CalcObject *c)
 {
     dbg.nospace() << c->getOperator();
@@ -15,6 +16,7 @@ QDebug operator<<(QDebug dbg, Number n)
 
     return dbg.space();
 }
+#endif
 
 // модифицированное поле ввода
 LineEdit::LineEdit(QWidget *parent) :
@@ -30,7 +32,6 @@ LineEdit::LineEdit(QWidget *parent) :
     pasteAct->setShortcut(QKeySequence::Paste);
     connect(pasteAct, SIGNAL(triggered()), SLOT(pasteSlot()));
 
-    setText(tr("0"));
     setAlignment(Qt::AlignRight);
     setReadOnly(true);
 
@@ -38,14 +39,20 @@ LineEdit::LineEdit(QWidget *parent) :
     f.setPointSize(f.pointSize() + 8);
     setFont(f);
 
-    m_waitOperand = false;
-
-    addNumber(0);
-    setText(getNumber().toString());
+    clearAll();
 
 //    setNumberMode();
 }
 
+/*
+ * нужно переработать класс (но сохранить интерфейсы)
+ * Сейчас одни и те же действия выполняются в каждой функции отдельно.
+ * Либо отвести для этих целей отдельную функцию, либо переработать сам
+ * алгоритм (последнее, скорее всего, затронет интерфейсы).
+ *
+ * Обязанность за ввод числа в стек и вывод на экран может
+ * принять на себя insertNumber()
+ */
 void LineEdit::addChar(QChar c)
 {
     if(m_waitOperand)
@@ -53,12 +60,16 @@ void LineEdit::addChar(QChar c)
         setText(tr("0"));
         m_waitOperand = false;
     }
+    else
+        m_numbers.pop();
 
     QString t = text();
     if(t == tr("0")) t = "";
-    addNumber(t.append(c));
-    isDisplayed = false;
-    // появятся проблемы, когда будет несколько систем счисления
+    t = t.append(c);
+    m_numbers.push(Number(t));
+    setText(t);
+
+    // возможно, появятся проблемы, когда будет несколько систем счисления
     emit numberChanged(getNumber());
 }
 
@@ -66,19 +77,10 @@ void LineEdit::addPoint()
 {
     QString t = text();
     if(!t.contains('.'))
+    {
         setText(t.append('.'));
-}
-
-void LineEdit::addNumber(Number n)
-{
-    if(m_numbers.size() > 1)    // чтобы не было лишних элементов
-        m_numbers.pop();
-    if(m_waitOperand && !m_numbers.isEmpty())
-        m_numbers.pop();
-    m_numbers.push(n);
-    isDisplayed = true;
-    setText(n.toString());
-    qDebug() << m_numbers;
+        m_waitOperand = false;
+    }
 }
 
 // ### TODO ###
@@ -88,23 +90,21 @@ void LineEdit::addOperator(CalcObject *co)
     if(co->getOperator().at(0) == '(')
     {
         postfix.push(co);
-        isDisplayed = false;
         return;
     }
 
     if(co->isUnary())
     {
-        Number n;
-        if(isDisplayed)
-            n = m_numbers.pop();
-        else
-            n = Number(text());
+        Number n = m_numbers.pop();
         n = co->calc(n);
-        addNumber(n);
+        m_numbers.push(n);
+        setText(n.toString());
+        emit numberChanged(n);
 
+#ifndef QT_NO_DEBUG
         qDebug() << m_numbers;
         qDebug() << postfix;
-
+#endif
         return;
     }
 
@@ -118,18 +118,17 @@ void LineEdit::addOperator(CalcObject *co)
         return;
     }
 
-    if(!isDisplayed)
-        m_numbers.push(Number(text()));
-
     p_calc(co);
 
     m_waitOperand = true;
-    setText(m_numbers.top().toString());
-    emit numberChanged(m_numbers.top());
+    setText(getNumber().toString());
+    emit numberChanged(getNumber());
     repaint();
 
+#ifndef QT_NO_DEBUG
     qDebug() << m_numbers;
     qDebug() << postfix;
+#endif
 }
 
 // Основано на обратной польской нотации
@@ -141,11 +140,10 @@ void LineEdit::p_calc(CalcObject *co)
         CalcObject *c1 = postfix.pop();
         while(c1->getOperator().at(0) != '(')
         {
-            n = oneOperation(c1);
+            n = binaryOperation(c1);
             m_numbers.push(n);
             c1 = postfix.pop();
         }
-        isDisplayed = true;
         return;
     }
 
@@ -153,15 +151,14 @@ void LineEdit::p_calc(CalcObject *co)
     {
         CalcObject *c1 = postfix.pop();
 
-        n = oneOperation(c1);
+        n = binaryOperation(c1);
         m_numbers.push(n);
     }
     postfix.push(co);
     m_operator = co->getOperator();
-    isDisplayed = false;
 }
 
-Number LineEdit::oneOperation(CalcObject *co)
+Number LineEdit::binaryOperation(CalcObject *co)
 {
     Number n2 = m_numbers.pop();
     Number n1 = m_numbers.pop();
@@ -171,7 +168,7 @@ Number LineEdit::oneOperation(CalcObject *co)
 void LineEdit::calculate()
 {
     // не могу объяснить, зачем условие.. так работает
-    if(!isDisplayed)
+    if(m_waitOperand)
         m_numbers.push(Number(text()));
 
     Number n;
@@ -179,40 +176,59 @@ void LineEdit::calculate()
     while(!postfix.isEmpty())
     {
         CalcObject *c1 = postfix.pop();
-        n = oneOperation(c1);
+        n = binaryOperation(c1);
         m_numbers.push(n);
     }
 
     clearAll();
-    addNumber(n);
-    emit numberChanged(m_numbers.top());
+    m_numbers.push(n);
+    setText(n.toString());
+    emit numberChanged(n);
+}
+
+void LineEdit::backspace()
+{
+    QLineEdit::backspace();
+    if(text().isEmpty())
+        clearSlot();
+    insertNumber(Number(text()));
 }
 
 // очищаем только экран
 void LineEdit::clearSlot()
 {
     setText(tr("0"));
+    m_waitOperand = true;
+    emit numberChanged(0);
 }
 
 void LineEdit::clearAll()
 {
     m_numbers.clear();
+    m_numbers.push(0);
     postfix.clear();
-    setText(tr("0"));
-    m_waitOperand = true;
-    isDisplayed = false;
+    clearSlot();
     m_operator = "";
 }
 
 void LineEdit::insertNumber(Number n)
 {
-    addNumber(n);
-    m_waitOperand = false;
-    emit numberChanged(m_numbers.top());
+    if(m_waitOperand)
+        m_waitOperand = false;
+    else
+        m_numbers.pop();
+    m_numbers.push(n);
+    setText(n.toString());
+    emit numberChanged(n);
+
+#ifndef QT_NO_DEBUG
+    qDebug() << m_numbers;
+#endif
 }
 
 Number LineEdit::getNumber() const
 {
+
     return m_numbers.top();
 }
 

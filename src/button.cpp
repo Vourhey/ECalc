@@ -11,7 +11,7 @@ Button::Button(const QString &text, QWidget *parent) :
 QSize Button::sizeHint() const
 {
     QSize size = QToolButton::sizeHint();
-    size.rheight() += 20;
+    size.rheight() += 15;
     size.rwidth() = qMax(size.height(), size.width());
     return size;
 }
