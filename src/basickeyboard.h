@@ -17,10 +17,7 @@ private slots:
     void backspaceSlot();
     void digitButtonSlot();
     void operationSlot();
-//    void twoOperandSlot(); // для + - * /
-//    void unaryOperationSlot(); // для унарных операций
-//    void resultSlot();
-//    void enableDigit(int = 10);
+    void enableDigit(int b);
 
 private:
     void initDefault();

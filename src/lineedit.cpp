@@ -39,9 +39,8 @@ LineEdit::LineEdit(QWidget *parent) :
     f.setPointSize(f.pointSize() + 8);
     setFont(f);
 
+    m_numberMode = 10;
     clearAll();
-
-//    setNumberMode();
 }
 
 /*
@@ -52,6 +51,8 @@ LineEdit::LineEdit(QWidget *parent) :
  *
  * Обязанность за ввод числа в стек и вывод на экран может
  * принять на себя insertNumber()
+ *
+ * Очищать m_numbers, если postfix пустой
  */
 void LineEdit::addChar(QChar c)
 {
@@ -66,11 +67,15 @@ void LineEdit::addChar(QChar c)
     QString t = text();
     if(t == tr("0")) t = "";
     t = t.append(c);
-    m_numbers.push(Number(t));
+    m_numbers.push(Number::toNumber(t));
     setText(t);
 
     // возможно, появятся проблемы, когда будет несколько систем счисления
     emit numberChanged(getNumber());
+
+#ifndef QT_NO_DEBUG
+    qDebug() << m_numbers;
+#endif
 }
 
 void LineEdit::addPoint()
@@ -108,6 +113,10 @@ void LineEdit::addOperator(CalcObject *co)
         return;
     }
 
+#ifndef QT_NO_DEBUG
+    qDebug() << "m_waitOperand: " << m_waitOperand;
+#endif
+
     if(m_waitOperand)   // пользователь просто меняет знак операции
     {
         if(!postfix.isEmpty())
@@ -120,7 +129,7 @@ void LineEdit::addOperator(CalcObject *co)
 
     p_calc(co);
 
-    m_waitOperand = true;
+    m_waitOperand = true;    
     setText(getNumber().toString());
     emit numberChanged(getNumber());
     repaint();
@@ -169,7 +178,11 @@ void LineEdit::calculate()
 {
     // не могу объяснить, зачем условие.. так работает
     if(m_waitOperand)
-        m_numbers.push(Number(text()));
+        m_numbers.push(Number::toNumber(text()));
+
+#ifndef QT_NO_DEBUG
+    qDebug() << m_numbers;
+#endif
 
     Number n;
 
@@ -191,7 +204,7 @@ void LineEdit::backspace()
     QLineEdit::backspace();
     if(text().isEmpty())
         clearSlot();
-    insertNumber(Number(text()));
+    insertNumber(Number::toNumber(text()));
 }
 
 // очищаем только экран
@@ -273,32 +286,33 @@ QAction *LineEdit::pasteAction() const
 ////    m_history->addNumber(text());
 //}
 
-///*
-// * нужно для programming mode
-// * 10 - decimal
-// * 8  - octal
-// * 16 - hexadecimal
-// *
-// * // todo
-// * 2 - bin
-// */
-//void LineEdit::setNumberMode(int m)
-//{
-//    if(m == m_numberMode)
-//        return;
+/*
+ * нужно для programming mode
+ * 10 - decimal
+ * 8  - octal
+ * 16 - hexadecimal
+ *
+ * // todo
+ * 2 - bin
+ */
+void LineEdit::setNumberMode(int m)
+{
+    if(m == m_numberMode)
+        return;
 
-//    if(m <= 0 || m > 16)
-//        return;
+    if(m <= 0 || m > 16)
+        return;
 
-//    m_numberMode = m;
-//    emit numberModeChanged(m);
-//    setNumber(displayed);
-//}
+    m_numberMode = m;
+    Number::setBase(m_numberMode);
+    setText(getNumber().toString());
+    emit numberModeChanged(m);
+}
 
-//int LineEdit::numberMode() const
-//{
-//    return m_numberMode;
-//}
+int LineEdit::numberMode() const
+{
+    return m_numberMode;
+}
 
 //void LineEdit::setWait(bool b)
 //{
@@ -313,7 +327,7 @@ QAction *LineEdit::pasteAction() const
 void LineEdit::pasteSlot()
 {
     QClipboard *cl = qApp->clipboard();
-    insertNumber(cl->text());
+    insertNumber(Number::toNumber(cl->text()));
 }
 
 //QByteArray LineEdit::saveState() const

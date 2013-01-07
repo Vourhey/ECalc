@@ -21,6 +21,9 @@ public:
 
     LineEdit *lineEdit() const;
 
+//    QByteArray saveState() const;
+//    void restoreState(const QByteArray &ba);
+
 public slots:
     void changeMode(int m = -1);
 

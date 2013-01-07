@@ -17,7 +17,7 @@ public:
     static Button *createButton(const QString &text, const QObject *obj,
                                 const char *member,
                                 const QKeySequence &key = QKeySequence(),
-                                const QString &tooltip = QString());
+                                const QString &statTip = QString());
 
 private:
     CalcObject *m_co;

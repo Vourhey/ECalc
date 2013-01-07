@@ -344,7 +344,7 @@ ProgrammingKeyboard::ProgrammingKeyboard(LineEdit *le, QWidget *parent) :
                                      QKeySequence(), tr("Logical Not"));
     notButton->setCalcObject(new NOTObj);
     modButton = Button::createButton(tr("mod"), this, SLOT(operationSlot()),
-                                     QKeySequence(tr("|")), tr("Modulo"));
+                                     QKeySequence(tr("")), tr("Modulo"));
     modButton->setCalcObject(new ModObj);
     logButton = Button::createButton(tr("log"), this, SLOT(operationSlot()),
                                      QKeySequence(), tr("Logarihm to base 10"));
@@ -362,7 +362,7 @@ ProgrammingKeyboard::ProgrammingKeyboard(LineEdit *le, QWidget *parent) :
                                            QKeySequence(tr("!")), tr("Factorial"));
     factorialButton->setCalcObject(new FactorialObj);
     absButton = Button::createButton(tr("|x|"), this, SLOT(operationSlot()),
-                                     QKeySequence(), tr("Absolute value"));
+                                     QKeySequence("|"), tr("Absolute value"));
     absButton->setCalcObject(new AbsObj);
     charButton = Button::createButton(tr("a\u0301"), this, SLOT(insertCodeOfChar()),
                                       QKeySequence(), tr("Insert character code"));
@@ -404,8 +404,8 @@ ProgrammingKeyboard::ProgrammingKeyboard(LineEdit *le, QWidget *parent) :
 
     setLayout(gridLayout);
 
- //   connect(lineEdit, SIGNAL(numberModeChanged(int)), SLOT(enableAF(int)));
-    enableAF(10);   // ### TODO ###
+    connect(lineEdit, SIGNAL(numberModeChanged(int)), SLOT(enableAF(int)));
+    enableAF(lineEdit->numberMode());
 }
 
 void ProgrammingKeyboard::enableAF(int b)

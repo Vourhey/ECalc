@@ -205,6 +205,8 @@ BasicKeyboard::BasicKeyboard(LineEdit *le, QWidget *parent) :
     mainLayout->addWidget(resultButton, 4, 4);
 
     setLayout(mainLayout);
+
+    connect(m_lineEdit, SIGNAL(numberModeChanged(int)), SLOT(enableDigit(int)));
 }
 
 
@@ -214,10 +216,9 @@ void BasicKeyboard::initDefault()
     backspaceButton = Button::createButton(tr("\u2190"), this, SLOT(backspaceSlot()),
                                            QKeySequence(Qt::Key_Backspace), tr("Backspace"));
     clearButton = Button::createButton(tr("C"), m_lineEdit, SLOT(clearSlot()),
-                                       QKeySequence(Qt::Key_Escape), tr("Clear display"));
-    clearButton->setStatusTip(tr("Clear display"));
-    clearAllButton = Button::createButton(tr("AC"), m_lineEdit, SLOT(clearAll()));
-    clearAllButton->setStatusTip(tr("Clear All"));
+                                       QKeySequence(Qt::Key_Delete), tr("Clear display"));
+    clearAllButton = Button::createButton(tr("AC"), m_lineEdit, SLOT(clearAll()),
+                                          QKeySequence(), tr("Clear All"));
 
     minusUnaryButton = Button::createButton(tr("\u00B1"), this, SLOT(operationSlot()),
                                          QKeySequence(Qt::Key_Percent), tr("Plus-minus"));
@@ -234,7 +235,6 @@ void BasicKeyboard::initDefault()
                                        QKeySequence("."));
     divideButton = Button::createButton(tr("\u00F7"), this, SLOT(operationSlot()),
                                         QKeySequence("/"), tr("Division"));
-    divideButton->setStatusTip(tr("Division")); // todo для каждого
     divideButton->setCalcObject(new DivideObj);
     multiplicationButton = Button::createButton(tr("x"), this, SLOT(operationSlot()),
                                                 QKeySequence("*"), tr("Multiplication"));
@@ -257,10 +257,10 @@ void BasicKeyboard::initDefault()
     resultButton = Button::createButton(tr("="), m_lineEdit, SLOT(calculate()),
                                         QKeySequence(Qt::Key_Return));
     leftBraceButton = Button::createButton(tr("("), this, SLOT(operationSlot()),
-                                           QKeySequence(Qt::Key_BraceLeft));
+                                           QKeySequence("("));
     leftBraceButton->setCalcObject(new LeftBraceObj);
     rightBraceButton = Button::createButton(tr(")"), this, SLOT(operationSlot()),
-                                           QKeySequence(Qt::Key_BraceRight));
+                                           QKeySequence(")"));
     rightBraceButton->setCalcObject(new RightBraceObj);
 }
 
@@ -282,7 +282,6 @@ void BasicKeyboard::operationSlot()
     m_lineEdit->addOperator(btn->calcObject());
 }
 
-/*
 void BasicKeyboard::enableDigit(int b)
 {
     if(b == 10)
@@ -305,118 +304,3 @@ void BasicKeyboard::enableDigit(int b)
             numberButton[i]->setEnabled(false);
     }
 }
-
-// вспомогательная функция для подсчета
-static Number calculate(Number op1, Number op2, const QString &d)
-{
-    if(d == QObject::tr("+"))
-        return op1 + op2;
-    if(d == QObject::tr("-"))
-        return op1 - op2;
-    if(d == QObject::tr("x"))
-        return op1 * op2;
-
-    // ну, других вариантов не остается
-    return op1 / op2;
-}
-
-void BasicKeyboard::twoOperandSlot()
-{
-    lineEdit->emitCalculateAll();
-
-    Number number = lineEdit->getNumber();
-    Button *btn = qobject_cast<Button*>(sender());
-    QString operation = btn->text();
-
-    if(operation == tr("+") || operation == tr("-"))
-    {
-        if(!lineEdit->waitOperand())    // знаю, говнокод... зато работает
-        {
-            if(!multipliStr.isEmpty())
-            {
-                number = calculate(factorSoFar, number, multipliStr);
-                multipliStr = "";
-                factorSoFar = 0.0;
-            }
-
-            if(!additiveStr.isEmpty())
-                number = calculate(sumSoFar, number, additiveStr);
-
-            lineEdit->setNumber(number);
-        }
-        else
-            multipliStr = "";
-
-        additiveStr = operation;
-        sumSoFar = number;
-    }
-    else // divide or multipli
-    {
-        if(lineEdit->waitOperand()) // ещё один костыль
-            additiveStr = "";
-     / *   if(!multipliStr.isEmpty())
-        {
-            number = calculate(factorSoFar, number, multipliStr);
-            lineEdit->setNumber(number);
-        } * /
-        multipliStr = operation;
-        factorSoFar = number;
-    }
-
-    lineEdit->setOperator(operation);
-    lineEdit->setWait(true);
-}
-
-void BasicKeyboard::unaryOperationSlot()
-{
-    Button *btn = qobject_cast<Button*>(sender());
-    Number number = lineEdit->getNumber();
-
-    QString operation = btn->text();
-
-    if(operation == tr("\u221A"))
-    {
-        if(number >= 0.0)   // для пользователя ничего не произойдет
-            number = sqrt(number.toDouble());
-    }
-    else if(operation == tr("x\u00B2"))
-        number = number * number;
-    else if(operation == tr("1/x"))
-    {
-        if(number != 0)
-            number = Number(1) / number;
-    }
-    else if(operation == tr("%"))
-    {
-        if(sumSoFar != 0) number = number * sumSoFar / 100;
-        else number /= 100;
-    }
-
-    lineEdit->setNumber(number);
-}
-
-void BasicKeyboard::resultSlot()
-{
-    Number number = lineEdit->getNumber();
-
-    if(!multipliStr.isEmpty())
-    {
-        number = calculate(factorSoFar, number, multipliStr);
-        lineEdit->setNumber(number);
-        multipliStr = "";
-        factorSoFar = 0.0;
-    }
-
-    if(!additiveStr.isEmpty())
-    {
-        number = calculate(sumSoFar, number, additiveStr);
-        lineEdit->setNumber(number);
-        additiveStr = "";
-        sumSoFar = 0.0;
-    }
-
-    lineEdit->emitCalculateAll();
-    lineEdit->resetOperator();
-    lineEdit->setWait(true);
-}
-*/

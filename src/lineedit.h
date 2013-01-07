@@ -20,6 +20,7 @@ public:
     void insertNumber(Number n);
 
     Number getNumber() const;
+    int numberMode() const;
 
 public slots:
     void calculate();   // =
@@ -27,6 +28,7 @@ public slots:
     void clearAll();
     void addPoint();
     void backspace();
+    void setNumberMode(int m = 10);
 
 //    ~LineEdit();
 
@@ -34,17 +36,14 @@ public slots:
 //    void resetOperator();
 
 //    void setNumber(Number n);
-//    int numberMode() const;
+
 
 //    QByteArray saveState() const;
 //    void restoreState(const QByteArray &ba);
 
 signals:
     void numberChanged(Number n);
-//    void numberModeChanged(int base);
-
-//public slots:
-//    void setNumberMode(int m = 10);
+    void numberModeChanged(int base);
 
 private slots:
     void pasteSlot();
@@ -62,7 +61,7 @@ private:
     QStack<Number> m_numbers;
     QStack<CalcObject*> postfix;
     bool m_waitOperand;
-//    int m_numberMode;
+    int m_numberMode;
 
     QMenu *contextMenu;
     QAction *copyAct;

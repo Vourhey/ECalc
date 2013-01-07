@@ -19,13 +19,13 @@ QSize Button::sizeHint() const
 // облегчает жизнь. Одной функцией настраиваются все жизнено важные параметры
 Button *Button::createButton(const QString &text, const QObject *obj,
                              const char *member, const QKeySequence &key,
-                             const QString &tooltip)
+                             const QString &statTip)
 {
     Button *btn = new Button(text);
     connect(btn, SIGNAL(clicked()), obj, member);
 
     if(!key.isEmpty()) btn->setShortcut(key);
-    if(!tooltip.isEmpty()) btn->setToolTip(tooltip);
+    if(!statTip.isEmpty()) btn->setStatusTip(statTip);
     return btn;
 }
 

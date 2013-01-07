@@ -2,14 +2,6 @@
 #include "mainwindow.h"
 #include "calculator.h"
 
-/*#include "lineedit.h"
-#include "basickeyboard.h"
-#include "numbersystemswitcher.h"
-#include "bineditor.h"
-#include "advancekeyboard.h"
-#include "programmingkeyboard.h"
-*/
-
 AboutDialog::AboutDialog(QWidget *parent)
     : QDialog(parent)
 {
@@ -53,10 +45,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     initActins();
     initMenu();
-/*    m_init()
-    initLayout();
-
-    restoreState(); */
+//    restoreState();
 }
 
 MainWindow::~MainWindow()
@@ -94,11 +83,11 @@ void MainWindow::initActins()
     ag->addAction(programmingAct);
     basicAct->setChecked(true);
 
- /*   clearMemoryAct = new QAction(tr("Clear memory"), this);
+    clearMemoryAct = new QAction(tr("Clear memory"), this);
     connect(clearMemoryAct, SIGNAL(triggered()), SLOT(clearMemory()));
 
     addToMemoryAct = new QAction(tr("New item"), this);
-    connect(addToMemoryAct, SIGNAL(triggered()), SLOT(addToMemory())); */
+    connect(addToMemoryAct, SIGNAL(triggered()), SLOT(addToMemory()));
 }
 
 void MainWindow::initMenu()
@@ -198,14 +187,14 @@ void MainWindow::initMenu()
     // ends constants =================================================
 */
 
-/*    QMenu *memoryMenu = mb->addMenu(tr("Memory"));
+    QMenu *memoryMenu = mb->addMenu(tr("Memory"));
 
     QMenu *writeToMenu = memoryMenu->addMenu(tr("Write to"));
     connect(writeToMenu, SIGNAL(aboutToShow()), SLOT(aboutToShowWriteMenu()));
     QMenu *readFromMenu = memoryMenu->addMenu(tr("Read from"));
     connect(readFromMenu, SIGNAL(aboutToShow()), SLOT(aboutToShowReadMenu()));
 
-    memoryMenu->addAction(clearMemoryAct); */
+    memoryMenu->addAction(clearMemoryAct);
 
     QMenu *helpMenu = mb->addMenu(tr("Help"));
     helpMenu->addAction(aboutAct);
@@ -218,135 +207,6 @@ void MainWindow::about()
         aboutDialog = new AboutDialog;
 
     aboutDialog->exec();
-}
-
-/*
-void MainWindow::initLayout()
-{
-    mainLayout = new QVBoxLayout;
-    mainLayout->setSpacing(0);
-    mainLayout->setMenuBar(new QMenuBar);
-
-    mainLayout->addWidget(m_lineEdit);
-
-    horizontalLayout = new QHBoxLayout;
-    horizontalLayout->setSpacing(0);
-
-    horizontalLayout->addWidget(m_basicKeyboard);
-
-    mainLayout->addLayout(horizontalLayout);
-
-    setLayout(mainLayout);
-}
-
-void MainWindow::closeEvent(QCloseEvent *)
-{
-    QSettings settings;
-
-    settings.beginGroup(tr("mainWindow"));
-    settings.setValue(tr("mode"), m_mode);
-    settings.setValue(tr("number"), m_lineEdit->saveState());
-    settings.setValue(tr("position"), pos());
-    settings.endGroup();
-
-    if(m_mode == 1)
-        ;   // save advance settings
-    else if(m_mode == 2)
-    {
-        settings.beginGroup(tr("programmingMode"));
-        settings.setValue(tr("numberSystemSwitcher"), m_numberSystemSwitcher->saveState());
-        settings.endGroup();
-    }
-}
-
-void MainWindow::restoreState()
-{
-    QSettings settings;
-
-    settings.beginGroup(tr("mainWindow"));
-    int mode = settings.value(tr("mode"), 0).toInt();
-    QPoint pos = settings.value(tr("position")).toPoint();
-    QByteArray ba = settings.value(tr("number"), QByteArray("\0\0\0\0\0\0\0\0u")).toByteArray();
-    settings.endGroup();
-
-    changeMode(mode);
-    move(pos);
-    m_lineEdit->restoreState(ba);
-
-    if(mode == 1)
-        ;   // ### todo
-    else if(mode == 2)
-    {
-        settings.beginGroup(tr("programmingMode"));
-        QByteArray b = settings.value(tr("numberSystemSwitcher"), QByteArray("\0\0\0\n")).toByteArray();
-        settings.endGroup();
-
-        m_numberSystemSwitcher->restoreState(b);
-    }
-}
-
-void MainWindow::changeMode(int mode)
-{
-    if(mode == -1)
-    {
-        QAction *act = qobject_cast<QAction*>(sender());
-        if(act == basicAct)
-            mode = 0;
-        else if(act == advanceAct)
-            mode = 1;
-        else
-            mode = 2;
-    }
-
-    if(m_mode == mode)
-        return; // уже выбран этот режим
-
-    m_mode = mode;
-
-    // возвращаем к Basic
-    if(m_numberSystemSwitcher)
-    {
-        mainLayout->removeWidget(m_numberSystemSwitcher);
-        m_numberSystemSwitcher->hide();
-    }
-    if(m_binEditor)
-    {
-        mainLayout->removeWidget(m_binEditor);
-        m_binEditor->hide();
-    }
-    if(m_programmingKeyboard)
-    {
-        horizontalLayout->removeWidget(m_programmingKeyboard);
-        m_programmingKeyboard->hide();
-    }
-    if(m_advanceKeyboard)
-    {
-        horizontalLayout->removeWidget(m_advanceKeyboard);
-        m_advanceKeyboard->hide();
-    }
-
-    switch(m_mode)
-    {
-    case 1:     // Advance
-        // ### TODO ###
-        break;
-    case 2:     // Programming
-        if(!m_numberSystemSwitcher)
-            m_numberSystemSwitcher = new NumberSystemSwitcher(m_lineEdit);
-        if(!m_binEditor)
-            m_binEditor = new BinEditor(m_lineEdit);
-        if(!m_programmingKeyboard)
-            m_programmingKeyboard = new ProgrammingKeyboard(m_lineEdit);
-
-        mainLayout->insertWidget(1, m_numberSystemSwitcher);
-        mainLayout->insertWidget(2, m_binEditor);
-        horizontalLayout->insertWidget(1, m_programmingKeyboard);
-
-        m_numberSystemSwitcher->show();
-        m_binEditor->show();
-        m_programmingKeyboard->show();
-        break;
-    }
 }
 
 void MainWindow::clearMemory()
@@ -390,28 +250,76 @@ void MainWindow::aboutToShowReadMenu()
 void MainWindow::addToMemory()
 {
     QAction *act = qobject_cast<QAction*>(sender());
-    QString linetext = m_lineEdit->text();
+    QString linetext = m_calc->lineEdit()->text();
 
     if(act == addToMemoryAct)
     {
         QAction *nact = new QAction(linetext, this);
-        nact->setData(m_lineEdit->numberMode());
+        nact->setData(m_calc->lineEdit()->numberMode());
         m_memory.append(nact);
     }
     else
     {
         act->setText(linetext);
-        act->setData(m_lineEdit->numberMode());
+        act->setData(m_calc->lineEdit()->numberMode());
     }
 }
 
 void MainWindow::insertIntoLineEdit()
 {
     QAction *act = qobject_cast<QAction*>(sender());
-    m_lineEdit->setNumberMode(act->data().toInt());
-    m_lineEdit->setNumber(act->text());
+    m_calc->lineEdit()->setNumberMode(act->data().toInt());
+    m_calc->lineEdit()->insertNumber(Number::toNumber(act->text()));
 }
 
+/*
+void MainWindow::closeEvent(QCloseEvent *)
+{
+    QSettings settings;
+
+    settings.beginGroup(tr("mainWindow"));
+//    settings.setValue(tr("mode"), m_mode);
+//    settings.setValue(tr("number"), m_lineEdit->saveState());
+    settings.setValue(tr("position"), pos());
+    settings.endGroup();
+
+    if(m_mode == 1)
+        ;   // save advance settings
+    else if(m_mode == 2)
+    {
+        settings.beginGroup(tr("programmingMode"));
+        settings.setValue(tr("numberSystemSwitcher"), m_numberSystemSwitcher->saveState());
+        settings.endGroup();
+    }
+}
+
+void MainWindow::restoreState()
+{
+    QSettings settings;
+
+    settings.beginGroup(tr("mainWindow"));
+    int mode = settings.value(tr("mode"), 0).toInt();
+    QPoint pos = settings.value(tr("position")).toPoint();
+    QByteArray ba = settings.value(tr("number"), QByteArray("\0\0\0\0\0\0\0\0u")).toByteArray();
+    settings.endGroup();
+
+    changeMode(mode);
+    move(pos);
+    m_lineEdit->restoreState(ba);
+
+    if(mode == 1)
+        ;   // ### todo
+    else if(mode == 2)
+    {
+        settings.beginGroup(tr("programmingMode"));
+        QByteArray b = settings.value(tr("numberSystemSwitcher"), QByteArray("\0\0\0\n")).toByteArray();
+        settings.endGroup();
+
+        m_numberSystemSwitcher->restoreState(b);
+    }
+} */
+
+/*
 void MainWindow::insertConst()
 {
     QAction *act = qobject_cast<QAction*>(sender());

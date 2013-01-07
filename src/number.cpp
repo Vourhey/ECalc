@@ -2,6 +2,10 @@
 #include "number.h"
 #include <QDebug>
 
+int Number::m_base = 10;
+char Number::m_format = 'g';
+int Number::m_precision = 9;
+
 Number::Number()
 {
     m_uintNumber = 0;
@@ -47,11 +51,6 @@ Number::Number(quint64 n)
     m_mode = qint8('u');
 }
 
-Number::Number(const QString &n)
-{
-    setCurrent(n.toDouble());
-}
-
 // целое ли число
 bool Number::isInteger() const
 {
@@ -68,20 +67,39 @@ bool Number::isDouble() const
     return m_mode == qint8('d');
 }
 
-// format и prec указываются только для double числа
-// ### TODO
-// а как внешние модули будут знать, что именно сейчас double???
-// решить эту проблему
+void Number::setBase(int base)
+{
+    if(base == 2 || base == 8 ||
+            base == 10 || base == 16)
+        m_base = base;
+}
+
+void Number::setFormat(char format)
+{
+    if(format == 'e' || format == 'E' ||
+            format == 'f' || format == 'g' || format == 'G')
+        m_format = format;
+}
+
+void Number::setPrecision(int prec)
+{
+    if(prec > 0)
+        m_precision = prec;
+}
+
 // ### TODO
 // перевод дробных чисел в системы счисления, отличные от 10
-QString Number::toString(int base, char format, int prec) const
+// ### TODO
+// написать собственную функцию double -> string
+// чтобы иметь полный контроль над целой, дробной частью и представлением
+QString Number::toString() const
 {
     if(isDouble())
-        return QString::number(m_realNumber, format, prec);
+        return QString::number(m_realNumber, m_format, m_precision);
     if(isInteger())
-        return QString::number(m_intNumber, base);
+        return QString::number(m_intNumber, m_base).toUpper();
     // иначе
-    return QString::number(m_uintNumber, base);
+    return QString::number(m_uintNumber, m_base).toUpper();
 }
 
 qreal Number::toDouble() const
@@ -112,15 +130,15 @@ quint64 Number::toUInt64() const
     return static_cast<quint64>(qFloor(m_realNumber));
 }
 
-Number Number::toNumber(const QString &s, int b)
+Number Number::toNumber(const QString &s)
 {
     bool ok;
 
     if(s.contains('.')/* || s.contains('E') || s.contains('e')*/) // double
         return s.toDouble();    // не учитывается система счисления
     if(s.contains('-')) // int
-        return s.toLongLong(&ok, b);
-    return s.toULongLong(&ok, b);
+        return s.toLongLong(&ok, m_base);
+    return s.toULongLong(&ok, m_base);
 }
 
 // Возвращает целую часть

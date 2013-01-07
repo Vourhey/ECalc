@@ -5,22 +5,9 @@
 #include <QDialog>
 
 class QLabel;
+class QAction;
 
 class AboutDialog;
-/*
-class QAction;
-class QMenuBar;
-class QVBoxLayout;
-class QHBoxLayout;
-
-class LineEdit;
-class BasicKeyboard;
-class AdvanceKeyboard;
-class ProgrammingKeyboard;
-class BinEditor;
-class NumberSystemSwitcher;
-*/
-
 class Calculator;
 
 class MainWindow : public QMainWindow
@@ -31,12 +18,22 @@ public:
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+protected:
+//  void closeEvent(QCloseEvent *);
+
 private slots:
     void about();
+    void clearMemory();
+    void aboutToShowWriteMenu();
+    void aboutToShowReadMenu();
+    void addToMemory();
+    void insertIntoLineEdit();
 
 private:
     void initActins();
     void initMenu();
+//    void restoreState();
+//    void insertConst();
 
     Calculator *m_calc;
 
@@ -46,40 +43,11 @@ private:
     QAction *basicAct;
     QAction *advanceAct;
     QAction *programmingAct;
-//    QAction *clearMemoryAct;
-//    QAction *addToMemoryAct;
+    QAction *clearMemoryAct;
+    QAction *addToMemoryAct;
 
     AboutDialog *aboutDialog;
-
-    /*
-protected:
-    void closeEvent(QCloseEvent *);
-
-private slots:
-    void changeMode(int = -1);
-    void clearMemory();
-    void aboutToShowWriteMenu();
-    void aboutToShowReadMenu();
-    void addToMemory();
-    void insertIntoLineEdit();
-    void insertConst();
-
-private:
-    void m_init();
-    void initLayout();
-    void restoreState();
-
-    LineEdit *m_lineEdit;
-    BasicKeyboard *m_basicKeyboard;
-    AdvanceKeyboard *m_advanceKeyboard;
-    ProgrammingKeyboard *m_programmingKeyboard;
-    BinEditor *m_binEditor;
-    NumberSystemSwitcher *m_numberSystemSwitcher;
-
-    QVBoxLayout *mainLayout;
-    QHBoxLayout *horizontalLayout;
-
-    QList<QAction*> m_memory; */
+    QList<QAction*> m_memory;
 };
 
 class AboutDialog : public QDialog
