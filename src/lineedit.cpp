@@ -20,7 +20,7 @@ QDebug operator<<(QDebug dbg, Number n)
 
 // модифицированное поле ввода
 LineEdit::LineEdit(QWidget *parent) :
-    QLineEdit(parent), contextMenu(0)
+    QLineEdit(parent), contextMenu(0), m_undoStack(0)
 {
 //    m_history = new History(this, tr("log"));
 
@@ -40,6 +40,7 @@ LineEdit::LineEdit(QWidget *parent) :
     setFont(f);
 
     m_numberMode = 10;
+    countBrace = 0;
     clearAll();
 }
 
@@ -68,10 +69,7 @@ void LineEdit::addChar(QChar c)
     if(t == tr("0")) t = "";
     t = t.append(c);
     m_numbers.push(Number::toNumber(t));
-    setText(t);
-
-    // возможно, появятся проблемы, когда будет несколько систем счисления
-    emit numberChanged(getNumber());
+    setMyNumber(t);
 
 #ifndef QT_NO_DEBUG
     qDebug() << m_numbers;
@@ -88,6 +86,14 @@ void LineEdit::addPoint()
     }
 }
 
+void LineEdit::setMyNumber(const QString &t)
+{
+    setText(t);
+    // возможно, появятся проблемы, когда будет несколько систем счисления
+    emit numberChanged(getNumber());
+}
+
+// Основано на обратной польской нотации
 // ### TODO ###
 // переработать алгоритм
 void LineEdit::addOperator(CalcObject *co)
@@ -95,16 +101,18 @@ void LineEdit::addOperator(CalcObject *co)
     if(co->getOperator().at(0) == '(')
     {
         postfix.push(co);
+        ++countBrace;
         return;
     }
 
+    Number n = getNumber();
+
     if(co->isUnary())
     {
-        Number n = m_numbers.pop();
+        n = m_numbers.pop();
         n = co->calc(n);
         m_numbers.push(n);
-        setText(n.toString());
-        emit numberChanged(n);
+        setMyNumber(n.toString());
 
 #ifndef QT_NO_DEBUG
         qDebug() << m_numbers;
@@ -127,25 +135,11 @@ void LineEdit::addOperator(CalcObject *co)
         return;
     }
 
-    p_calc(co);
-
-    m_waitOperand = true;    
-    setText(getNumber().toString());
-    emit numberChanged(getNumber());
-    repaint();
-
-#ifndef QT_NO_DEBUG
-    qDebug() << m_numbers;
-    qDebug() << postfix;
-#endif
-}
-
-// Основано на обратной польской нотации
-void LineEdit::p_calc(CalcObject *co)
-{
-    Number n;
     if(!postfix.isEmpty() && co->getOperator() == tr(")"))
     {
+        if(countBrace == 0)
+            return;
+
         CalcObject *c1 = postfix.pop();
         while(c1->getOperator().at(0) != '(')
         {
@@ -153,6 +147,9 @@ void LineEdit::p_calc(CalcObject *co)
             m_numbers.push(n);
             c1 = postfix.pop();
         }
+        --countBrace;
+        m_waitOperand = false;
+        setMyNumber(n.toString());
         return;
     }
 
@@ -165,6 +162,15 @@ void LineEdit::p_calc(CalcObject *co)
     }
     postfix.push(co);
     m_operator = co->getOperator();
+
+    m_waitOperand = true;    
+    setMyNumber(n.toString());
+    repaint();  // нужно ли?
+
+#ifndef QT_NO_DEBUG
+    qDebug() << m_numbers;
+    qDebug() << postfix;
+#endif
 }
 
 Number LineEdit::binaryOperation(CalcObject *co)
@@ -195,8 +201,7 @@ void LineEdit::calculate()
 
     clearAll();
     m_numbers.push(n);
-    setText(n.toString());
-    emit numberChanged(n);
+    setMyNumber(n.toString());
 }
 
 void LineEdit::backspace()
@@ -231,8 +236,7 @@ void LineEdit::insertNumber(Number n)
     else
         m_numbers.pop();
     m_numbers.push(n);
-    setText(n.toString());
-    emit numberChanged(n);
+    setMyNumber(n.toString());
 
 #ifndef QT_NO_DEBUG
     qDebug() << m_numbers;
@@ -241,7 +245,6 @@ void LineEdit::insertNumber(Number n)
 
 Number LineEdit::getNumber() const
 {
-
     return m_numbers.top();
 }
 
@@ -314,15 +317,10 @@ int LineEdit::numberMode() const
     return m_numberMode;
 }
 
-//void LineEdit::setWait(bool b)
-//{
-//    m_waitOperand = b;
-//}
-
-//bool LineEdit::waitOperand() const
-//{
-//    return m_waitOperand;
-//}
+void LineEdit::setUndoStack(QUndoStack *undoStack)
+{
+    m_undoStack = undoStack;
+}
 
 void LineEdit::pasteSlot()
 {
@@ -374,4 +372,13 @@ void LineEdit::paintEvent(QPaintEvent *e)
         p.drawRect(5, height()-15, 11, 11);
         p.drawText(5, height()-15, 12, 12, Qt::AlignCenter, m_operator);
     }
+
+    // ### TODO v0.5 ###
+    /* рисовать счетчик скобочек */
+
+    // ### TODO v0.5 ###
+    /* рисовать систему счисления */
+
+    // ### TODO v0.5 ###
+    /* рисовать единицу измерения углов */
 }

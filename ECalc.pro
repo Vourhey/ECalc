@@ -25,7 +25,8 @@ SOURCES += src/main.cpp\
     src/number.cpp \
 #    src/history.cpp \
     src/calculator.cpp \
-    src/calcobject.cpp
+    src/calcobject.cpp \
+    src/undocommand.cpp
 
 HEADERS  += src/mainwindow.h \
     src/button.h \
@@ -38,7 +39,8 @@ HEADERS  += src/mainwindow.h \
     src/number.h \
 #    src/history.h \
     src/calculator.h \
-    src/calcobject.h
+    src/calcobject.h \
+    src/undocommand.h
 
 OBJECTS_DIR = obj/
 MOC_DIR = moc/

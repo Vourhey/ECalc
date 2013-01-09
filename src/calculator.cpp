@@ -1,5 +1,11 @@
 #include <QVBoxLayout>
 #include <QAction>
+#include <QUndoStack>
+
+#ifndef QT_NO_DEBUG
+#include <QUndoView>
+#endif
+
 #include "calculator.h"
 #include "basickeyboard.h"
 #include "numbersystemswitcher.h"
@@ -27,12 +33,29 @@ Calculator::Calculator(QWidget *parent) :
 
     setLayout(mainLayout);
 
+    undoStack = new QUndoStack;
+
+#ifdef QT_NO_DEBUG
+    QUndoView *undoView = new QUndoView(undoStack);
+    undoView->show();
+#endif
+
     changeMode(1);
 }
 
 LineEdit *Calculator::lineEdit() const
 {
     return m_lineEdit;
+}
+
+QAction *Calculator::undoAction(QObject *o) const
+{
+    return undoStack->createUndoAction(o, tr("Undo"));
+}
+
+QAction *Calculator::redoAction(QObject *o) const
+{
+    return undoStack->createRedoAction(o, tr("Redo"));
 }
 
 // если m == -1, то вызвано из меню

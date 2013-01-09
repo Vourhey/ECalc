@@ -98,6 +98,9 @@ void MainWindow::initMenu()
     fileMenu->addAction(m_calc->lineEdit()->copyAction());
     fileMenu->addAction(m_calc->lineEdit()->pasteAction());
     fileMenu->addSeparator();
+    fileMenu->addAction(m_calc->undoAction(this));
+    fileMenu->addAction(m_calc->redoAction(this));
+    fileMenu->addSeparator();
     fileMenu->addAction(exitAct);
 
     QMenu *modeMenu = mb->addMenu(tr("Mode"));

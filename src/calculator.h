@@ -10,6 +10,7 @@ class ProgrammingKeyboard;
 class BinEditor;
 class AdvanceKeyboard;
 
+class QUndoStack;
 class QVBoxLayout;
 class QHBoxLayout;
 
@@ -20,6 +21,8 @@ public:
     explicit Calculator(QWidget *parent = 0);
 
     LineEdit *lineEdit() const;
+    QAction *undoAction(QObject *o) const;
+    QAction *redoAction(QObject *o) const;
 
 //    QByteArray saveState() const;
 //    void restoreState(const QByteArray &ba);
@@ -39,6 +42,8 @@ private:
     QHBoxLayout *horizontalLayout;
 
     int m_mode; // текущий режим
+
+    QUndoStack *undoStack;
 };
 
 #endif // CALCULATOR_H

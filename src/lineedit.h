@@ -6,6 +6,8 @@
 #include "number.h"
 #include "calcobject.h"
 
+class QUndoStack;
+
 class LineEdit : public QLineEdit
 {
     Q_OBJECT
@@ -22,6 +24,8 @@ public:
     Number getNumber() const;
     int numberMode() const;
 
+    void setUndoStack(QUndoStack *undoStack);
+
 public slots:
     void calculate();   // =
     void clearSlot();
@@ -31,13 +35,9 @@ public slots:
     void setNumberMode(int m = 10);
 
 //    ~LineEdit();
-
 //    void setOperator(const QString &op);
 //    void resetOperator();
-
 //    void setNumber(Number n);
-
-
 //    QByteArray saveState() const;
 //    void restoreState(const QByteArray &ba);
 
@@ -53,7 +53,8 @@ protected:
     void paintEvent(QPaintEvent *);
 
 private:
-    void p_calc(CalcObject *co);
+//    void p_calc(CalcObject *co);
+    void setMyNumber(const QString &t);
     Number binaryOperation(CalcObject *co);
 
     QString m_operator;
@@ -62,11 +63,13 @@ private:
     QStack<CalcObject*> postfix;
     bool m_waitOperand;
     int m_numberMode;
+    int countBrace; // счетчик скобочек
 
     QMenu *contextMenu;
     QAction *copyAct;
     QAction *pasteAct;
 
+    QUndoStack *m_undoStack;
 //    History *m_history;
 };
 
