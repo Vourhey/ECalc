@@ -12,9 +12,7 @@ class BasicKeyboard : public QWidget
 public:
     explicit BasicKeyboard(LineEdit *le, QWidget *parent = 0);
 
-
 private slots:
-    void backspaceSlot();
     void digitButtonSlot();
     void operationSlot();
     void enableDigit(int b);

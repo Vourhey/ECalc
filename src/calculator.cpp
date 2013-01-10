@@ -34,8 +34,9 @@ Calculator::Calculator(QWidget *parent) :
     setLayout(mainLayout);
 
     undoStack = new QUndoStack;
+    m_lineEdit->setUndoStack(undoStack);
 
-#ifdef QT_NO_DEBUG
+#ifndef QT_NO_DEBUG
     QUndoView *undoView = new QUndoView(undoStack);
     undoView->show();
 #endif
@@ -50,12 +51,12 @@ LineEdit *Calculator::lineEdit() const
 
 QAction *Calculator::undoAction(QObject *o) const
 {
-    return undoStack->createUndoAction(o, tr("Undo"));
+    return undoStack->createUndoAction(o/*, tr("Undo")*/);
 }
 
 QAction *Calculator::redoAction(QObject *o) const
 {
-    return undoStack->createRedoAction(o, tr("Redo"));
+    return undoStack->createRedoAction(o/*, tr("Redo")*/);
 }
 
 // если m == -1, то вызвано из меню

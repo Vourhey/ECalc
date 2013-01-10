@@ -213,7 +213,7 @@ BasicKeyboard::BasicKeyboard(LineEdit *le, QWidget *parent) :
 // выполняет начальную инициализацию
 void BasicKeyboard::initDefault()
 {
-    backspaceButton = Button::createButton(tr("\u2190"), this, SLOT(backspaceSlot()),
+    backspaceButton = Button::createButton(tr("\u2190"), m_lineEdit, SLOT(backspace()),
                                            QKeySequence(Qt::Key_Backspace), tr("Backspace"));
     clearButton = Button::createButton(tr("C"), m_lineEdit, SLOT(clearSlot()),
                                        QKeySequence(Qt::Key_Delete), tr("Clear display"));
@@ -262,11 +262,6 @@ void BasicKeyboard::initDefault()
     rightBraceButton = Button::createButton(tr(")"), this, SLOT(operationSlot()),
                                            QKeySequence(")"));
     rightBraceButton->setCalcObject(new RightBraceObj);
-}
-
-void BasicKeyboard::backspaceSlot()
-{
-    m_lineEdit->backspace();
 }
 
 void BasicKeyboard::digitButtonSlot()

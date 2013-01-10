@@ -45,6 +45,8 @@ private:
     QAction *programmingAct;
     QAction *clearMemoryAct;
     QAction *addToMemoryAct;
+    QAction *undoAct;
+    QAction *redoAct;
 
     AboutDialog *aboutDialog;
     QList<QAction*> m_memory;

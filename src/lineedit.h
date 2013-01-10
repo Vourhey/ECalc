@@ -7,6 +7,7 @@
 #include "calcobject.h"
 
 class QUndoStack;
+class UndoCommand;
 
 class LineEdit : public QLineEdit
 {
@@ -25,6 +26,8 @@ public:
     int numberMode() const;
 
     void setUndoStack(QUndoStack *undoStack);
+    // далеко не самое удачное решение проблемы, но пусть пока так...
+    void setStacks(const QStack<Number> &n, const QStack<CalcObject*> &p);
 
 public slots:
     void calculate();   // =
@@ -56,6 +59,8 @@ private:
 //    void p_calc(CalcObject *co);
     void setMyNumber(const QString &t);
     Number binaryOperation(CalcObject *co);
+    UndoCommand *createUndo();
+    void pushUndo(UndoCommand *c);
 
     QString m_operator;
     Number displayed;

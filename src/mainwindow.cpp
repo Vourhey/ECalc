@@ -88,6 +88,12 @@ void MainWindow::initActins()
 
     addToMemoryAct = new QAction(tr("New item"), this);
     connect(addToMemoryAct, SIGNAL(triggered()), SLOT(addToMemory()));
+
+    undoAct = m_calc->undoAction(this);
+    undoAct->setShortcut(QKeySequence::Undo);
+
+    redoAct = m_calc->redoAction(this);
+    redoAct->setShortcut(QKeySequence::Redo);
 }
 
 void MainWindow::initMenu()
@@ -98,8 +104,8 @@ void MainWindow::initMenu()
     fileMenu->addAction(m_calc->lineEdit()->copyAction());
     fileMenu->addAction(m_calc->lineEdit()->pasteAction());
     fileMenu->addSeparator();
-    fileMenu->addAction(m_calc->undoAction(this));
-    fileMenu->addAction(m_calc->redoAction(this));
+    fileMenu->addAction(undoAct);
+    fileMenu->addAction(redoAct);
     fileMenu->addSeparator();
     fileMenu->addAction(exitAct);
 

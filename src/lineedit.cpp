@@ -1,6 +1,7 @@
 #include <QtGui>
 #include "lineedit.h"
 #include "history.h"
+#include "undocommand.h"
 
 #ifndef QT_NO_DEBUG
 QDebug operator<<(QDebug dbg, CalcObject *c)
@@ -41,7 +42,10 @@ LineEdit::LineEdit(QWidget *parent) :
 
     m_numberMode = 10;
     countBrace = 0;
-    clearAll();
+    m_numbers.push(0);
+    setText(tr("0"));
+    m_waitOperand = false;
+    m_operator = "";
 }
 
 /*
@@ -57,6 +61,8 @@ LineEdit::LineEdit(QWidget *parent) :
  */
 void LineEdit::addChar(QChar c)
 {
+    UndoCommand *command = createUndo();
+
     if(m_waitOperand)
     {
         setText(tr("0"));
@@ -70,6 +76,8 @@ void LineEdit::addChar(QChar c)
     t = t.append(c);
     m_numbers.push(Number::toNumber(t));
     setMyNumber(t);
+
+    pushUndo(command);
 
 #ifndef QT_NO_DEBUG
     qDebug() << m_numbers;
@@ -98,16 +106,15 @@ void LineEdit::setMyNumber(const QString &t)
 // переработать алгоритм
 void LineEdit::addOperator(CalcObject *co)
 {
+    Number n = getNumber();
+    UndoCommand *c = createUndo();
+
     if(co->getOperator().at(0) == '(')
     {
         postfix.push(co);
         ++countBrace;
-        return;
     }
-
-    Number n = getNumber();
-
-    if(co->isUnary())
+    else if(co->isUnary())
     {
         n = m_numbers.pop();
         n = co->calc(n);
@@ -118,27 +125,23 @@ void LineEdit::addOperator(CalcObject *co)
         qDebug() << m_numbers;
         qDebug() << postfix;
 #endif
-        return;
     }
-
-#ifndef QT_NO_DEBUG
-    qDebug() << "m_waitOperand: " << m_waitOperand;
-#endif
-
-    if(m_waitOperand)   // пользователь просто меняет знак операции
+    else if(m_waitOperand)   // пользователь просто меняет знак операции
     {
         if(!postfix.isEmpty())
             postfix.pop();
         postfix.push(co);
         m_operator = co->getOperator();
         repaint();
-        return;
     }
-
-    if(!postfix.isEmpty() && co->getOperator() == tr(")"))
+    // если встретилась закрывающаяся скобочка
+    else  if(!postfix.isEmpty() && co->getOperator() == tr(")"))
     {
         if(countBrace == 0)
+        {
+            delete c;
             return;
+        }
 
         CalcObject *c1 = postfix.pop();
         while(c1->getOperator().at(0) != '(')
@@ -150,22 +153,25 @@ void LineEdit::addOperator(CalcObject *co)
         --countBrace;
         m_waitOperand = false;
         setMyNumber(n.toString());
-        return;
+    }
+    else
+    {   // считаем, что можно посчитать и добавляем оператор
+        while(!postfix.isEmpty() && co->priority() >= postfix.top()->priority())
+        {
+            CalcObject *c1 = postfix.pop();
+
+            n = binaryOperation(c1);
+            m_numbers.push(n);
+        }
+        postfix.push(co);
+        m_operator = co->getOperator();
+
+        m_waitOperand = true;
+        setMyNumber(n.toString());
+        repaint();  // нужно ли?
     }
 
-    while(!postfix.isEmpty() && co->priority() >= postfix.top()->priority())
-    {
-        CalcObject *c1 = postfix.pop();
-
-        n = binaryOperation(c1);
-        m_numbers.push(n);
-    }
-    postfix.push(co);
-    m_operator = co->getOperator();
-
-    m_waitOperand = true;    
-    setMyNumber(n.toString());
-    repaint();  // нужно ли?
+    pushUndo(c);
 
 #ifndef QT_NO_DEBUG
     qDebug() << m_numbers;
@@ -182,6 +188,8 @@ Number LineEdit::binaryOperation(CalcObject *co)
 
 void LineEdit::calculate()
 {
+    UndoCommand *c = createUndo();
+
     // не могу объяснить, зачем условие.. так работает
     if(m_waitOperand)
         m_numbers.push(Number::toNumber(text()));
@@ -202,6 +210,8 @@ void LineEdit::calculate()
     clearAll();
     m_numbers.push(n);
     setMyNumber(n.toString());
+
+    pushUndo(c);
 }
 
 void LineEdit::backspace()
@@ -216,21 +226,27 @@ void LineEdit::backspace()
 void LineEdit::clearSlot()
 {
     setText(tr("0"));
-    m_waitOperand = true;
+    m_waitOperand = false;
     emit numberChanged(0);
 }
 
 void LineEdit::clearAll()
 {
+    UndoCommand *c = createUndo();
+
     m_numbers.clear();
     m_numbers.push(0);
     postfix.clear();
     clearSlot();
     m_operator = "";
+
+    pushUndo(c);
 }
 
 void LineEdit::insertNumber(Number n)
 {
+    UndoCommand *c = createUndo();
+
     if(m_waitOperand)
         m_waitOperand = false;
     else
@@ -238,9 +254,40 @@ void LineEdit::insertNumber(Number n)
     m_numbers.push(n);
     setMyNumber(n.toString());
 
+    pushUndo(c);
+
 #ifndef QT_NO_DEBUG
     qDebug() << m_numbers;
 #endif
+}
+
+UndoCommand *LineEdit::createUndo()
+{
+    UndoCommand *c = new UndoCommand(this);
+    c->setUndoNumbers(m_numbers);
+    c->setUndoPostfix(postfix);
+    return c;
+}
+
+// передать указатель, полученный из createUndo(),
+// но уже после необходимых изменений m_numbers и postfix
+void LineEdit::pushUndo(UndoCommand *c)
+{
+    c->setRedoNumbers(m_numbers);
+    c->setRedoPostfix(postfix);
+    m_undoStack->push(c);
+}
+
+void LineEdit::setStacks(const QStack<Number> &n, const QStack<CalcObject *> &p)
+{
+    // придумать что-нибудь для этого
+    if(m_numbers == n && postfix == p)
+        return;
+    m_numbers = n;
+    postfix   = p;
+    m_waitOperand = true; /*false; */  // ?
+    setMyNumber(getNumber().toString());
+    m_operator = "";
 }
 
 Number LineEdit::getNumber() const
